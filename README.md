@@ -7,6 +7,10 @@
 모바일에서 pdf 파일을 열고 공유 버튼을 눌러 이 프린터 앱으로 파일을 공유하세요. 앱으로 돌아와서 휴대폰 번호를 입력하고 문서를 확인한 뒤 print 버튼을 누르면 끝. 쉽죠?
 
 앱스토어 URL: https://apps.apple.com/kr/app/아주대학교-프린터/id1644664565
+
+![image](https://user-images.githubusercontent.com/61102713/198851969-b355ce8b-3f34-4b94-b650-2753d1f781b1.png)
+감사하게도 출시 이후 지금까지 196번의 다운로드가 진행되었습니다. 오.. 
+
 ## How to Use? (만화로 그렸어요)
 https://github.com/KyoungsueKim/super-parakeet/blob/main/COMIC.md
 ## Prerequisite (managed by CocoaPods)
