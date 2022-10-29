@@ -1,0 +1,6 @@
+framework module Pods_super_parakeet {
+  umbrella header "Pods-super-parakeet-umbrella.h"
+
+  export *
+  module * { export * }
+}

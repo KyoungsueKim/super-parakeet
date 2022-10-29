@@ -1,0 +1,744 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 55;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		D122936028AEC45800AFB2AE /* HapticManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D122935F28AEC45800AFB2AE /* HapticManager.swift */; };
+		D122936128AEC45800AFB2AE /* HapticManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D122935F28AEC45800AFB2AE /* HapticManager.swift */; };
+		D122936428AECFDE00AFB2AE /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D122936328AECFDE00AFB2AE /* Extensions.swift */; };
+		D122936528AECFDE00AFB2AE /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D122936328AECFDE00AFB2AE /* Extensions.swift */; };
+		D122936828B042BF00AFB2AE /* PrintJobs.swift in Sources */ = {isa = PBXBuildFile; fileRef = D122936728B042BF00AFB2AE /* PrintJobs.swift */; };
+		D122936928B042BF00AFB2AE /* PrintJobs.swift in Sources */ = {isa = PBXBuildFile; fileRef = D122936728B042BF00AFB2AE /* PrintJobs.swift */; };
+		D12CC79128AC51C100D828C0 /* ShareViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D12CC79028AC51C100D828C0 /* ShareViewController.swift */; };
+		D12CC79428AC51C100D828C0 /* MainInterface.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D12CC79228AC51C100D828C0 /* MainInterface.storyboard */; };
+		D12CC79D28AC51C700D828C0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D1DC260328A4F10700D141AD /* Assets.xcassets */; };
+		D12CC79E28AE138D00D828C0 /* CustomModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1DC263528A4F5A500D141AD /* CustomModifier.swift */; };
+		D12CC79F28AE139000D828C0 /* CustomTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1DC263628A4F5A500D141AD /* CustomTextField.swift */; };
+		D12CC7A028AE14CA00D828C0 /* UIConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1DC263128A4F56A00D141AD /* UIConfiguration.swift */; };
+		D12CC7A128AE14EF00D828C0 /* UIColorExt.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1DC263028A4F56A00D141AD /* UIColorExt.swift */; };
+		D138E99D28CE92BF00F588E6 /* super-parakeet-sharext.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = D12CC78E28AC51C100D828C0 /* super-parakeet-sharext.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		D1495E2428C32AD000D64E18 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = D1495E2728C32AD000D64E18 /* InfoPlist.strings */; };
+		D1495E2528C32AD000D64E18 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = D1495E2728C32AD000D64E18 /* InfoPlist.strings */; };
+		D1512A3428B46126000A8886 /* Messages.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1512A3328B46126000A8886 /* Messages.swift */; };
+		D1512A3728B46897000A8886 /* UploadStatusModalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1512A3628B46897000A8886 /* UploadStatusModalView.swift */; };
+		D1512A3928B46920000A8886 /* ShareView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1512A3828B46920000A8886 /* ShareView.swift */; };
+		D1CE34E928C30B4200FC45D7 /* Pods_super_parakeet.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4E04AA76765CF341329362E5 /* Pods_super_parakeet.framework */; };
+		D1D8F76F28CC7F96006A310B /* GoogleADView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1D8F76E28CC7F96006A310B /* GoogleADView.swift */; };
+		D1DC260028A4F10700D141AD /* super_parakeetApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1DC25FF28A4F10700D141AD /* super_parakeetApp.swift */; };
+		D1DC260228A4F10700D141AD /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1DC260128A4F10700D141AD /* MainView.swift */; };
+		D1DC260428A4F10700D141AD /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D1DC260328A4F10700D141AD /* Assets.xcassets */; };
+		D1DC260728A4F10700D141AD /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D1DC260628A4F10700D141AD /* Preview Assets.xcassets */; };
+		D1DC263228A4F56A00D141AD /* UIColorExt.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1DC263028A4F56A00D141AD /* UIColorExt.swift */; };
+		D1DC263328A4F56A00D141AD /* UIConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1DC263128A4F56A00D141AD /* UIConfiguration.swift */; };
+		D1DC263728A4F5A500D141AD /* CustomModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1DC263528A4F5A500D141AD /* CustomModifier.swift */; };
+		D1DC263828A4F5A500D141AD /* CustomTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1DC263628A4F5A500D141AD /* CustomTextField.swift */; };
+		D1DC263B28AA27AD00D141AD /* Requests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1DC263A28AA27AD00D141AD /* Requests.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		D138E99E28CE92BF00F588E6 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D1DC25F428A4F10700D141AD /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D12CC78D28AC51C100D828C0;
+			remoteInfo = "super-parakeet-sharext";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		D138E9A028CE92BF00F588E6 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				D138E99D28CE92BF00F588E6 /* super-parakeet-sharext.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		0D1EFCD0149DFA2D12BF59DA /* Pods_super_parakeetTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_super_parakeetTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		11D85BFF05556E7C0D25C4CA /* Pods-super-parakeet.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-super-parakeet.debug.xcconfig"; path = "Target Support Files/Pods-super-parakeet/Pods-super-parakeet.debug.xcconfig"; sourceTree = "<group>"; };
+		4D1FA73E42230F811ADE49AC /* Pods_super_parakeet_super_parakeetUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_super_parakeet_super_parakeetUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		4E04AA76765CF341329362E5 /* Pods_super_parakeet.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_super_parakeet.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		D122935F28AEC45800AFB2AE /* HapticManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticManager.swift; sourceTree = "<group>"; };
+		D122936328AECFDE00AFB2AE /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
+		D122936728B042BF00AFB2AE /* PrintJobs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrintJobs.swift; sourceTree = "<group>"; };
+		D12CC78E28AC51C100D828C0 /* super-parakeet-sharext.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "super-parakeet-sharext.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
+		D12CC79028AC51C100D828C0 /* ShareViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareViewController.swift; sourceTree = "<group>"; };
+		D12CC79328AC51C100D828C0 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/MainInterface.storyboard; sourceTree = "<group>"; };
+		D12CC79528AC51C100D828C0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		D12CC79928AC51C100D828C0 /* super-parakeet-sharext.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "super-parakeet-sharext.entitlements"; sourceTree = "<group>"; };
+		D1495E2628C32AD000D64E18 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		D1495E2828C32AE200D64E18 /* ko */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ko; path = ko.lproj/MainInterface.strings; sourceTree = "<group>"; };
+		D1495E2928C32AE200D64E18 /* ko */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ko; path = ko.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		D1512A3328B46126000A8886 /* Messages.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Messages.swift; sourceTree = "<group>"; };
+		D1512A3628B46897000A8886 /* UploadStatusModalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UploadStatusModalView.swift; sourceTree = "<group>"; };
+		D1512A3828B46920000A8886 /* ShareView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareView.swift; sourceTree = "<group>"; };
+		D1D8F76828CC376B006A310B /* info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = info.plist; sourceTree = "<group>"; };
+		D1D8F76E28CC7F96006A310B /* GoogleADView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleADView.swift; sourceTree = "<group>"; };
+		D1DC25FC28A4F10700D141AD /* super-parakeet.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "super-parakeet.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		D1DC25FF28A4F10700D141AD /* super_parakeetApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = super_parakeetApp.swift; sourceTree = "<group>"; };
+		D1DC260128A4F10700D141AD /* MainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
+		D1DC260328A4F10700D141AD /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		D1DC260628A4F10700D141AD /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		D1DC262928A4F1E300D141AD /* super-parakeet.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "super-parakeet.entitlements"; sourceTree = "<group>"; };
+		D1DC263028A4F56A00D141AD /* UIColorExt.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIColorExt.swift; sourceTree = "<group>"; };
+		D1DC263128A4F56A00D141AD /* UIConfiguration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIConfiguration.swift; sourceTree = "<group>"; };
+		D1DC263528A4F5A500D141AD /* CustomModifier.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomModifier.swift; sourceTree = "<group>"; };
+		D1DC263628A4F5A500D141AD /* CustomTextField.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomTextField.swift; sourceTree = "<group>"; };
+		D1DC263A28AA27AD00D141AD /* Requests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Requests.swift; sourceTree = "<group>"; };
+		F5ECC684FDC831AD457B6A86 /* Pods-super-parakeet.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-super-parakeet.release.xcconfig"; path = "Target Support Files/Pods-super-parakeet/Pods-super-parakeet.release.xcconfig"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		D12CC78B28AC51C100D828C0 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D1DC25F928A4F10700D141AD /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D1CE34E928C30B4200FC45D7 /* Pods_super_parakeet.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		54F685984FAB48F0E5328EB7 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				11D85BFF05556E7C0D25C4CA /* Pods-super-parakeet.debug.xcconfig */,
+				F5ECC684FDC831AD457B6A86 /* Pods-super-parakeet.release.xcconfig */,
+			);
+			path = Pods;
+			sourceTree = "<group>";
+		};
+		5A7154DD829AF69E0F6EFF99 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				4E04AA76765CF341329362E5 /* Pods_super_parakeet.framework */,
+				4D1FA73E42230F811ADE49AC /* Pods_super_parakeet_super_parakeetUITests.framework */,
+				0D1EFCD0149DFA2D12BF59DA /* Pods_super_parakeetTests.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		D12CC78F28AC51C100D828C0 /* super-parakeet-sharext */ = {
+			isa = PBXGroup;
+			children = (
+				D12CC79928AC51C100D828C0 /* super-parakeet-sharext.entitlements */,
+				D12CC79028AC51C100D828C0 /* ShareViewController.swift */,
+				D12CC79228AC51C100D828C0 /* MainInterface.storyboard */,
+				D12CC79528AC51C100D828C0 /* Info.plist */,
+				D1512A3828B46920000A8886 /* ShareView.swift */,
+			);
+			path = "super-parakeet-sharext";
+			sourceTree = "<group>";
+		};
+		D1512A3528B4687E000A8886 /* View */ = {
+			isa = PBXGroup;
+			children = (
+				D1DC260128A4F10700D141AD /* MainView.swift */,
+				D1512A3628B46897000A8886 /* UploadStatusModalView.swift */,
+				D1D8F76E28CC7F96006A310B /* GoogleADView.swift */,
+			);
+			path = View;
+			sourceTree = "<group>";
+		};
+		D1DC25F328A4F10700D141AD = {
+			isa = PBXGroup;
+			children = (
+				D1495E2728C32AD000D64E18 /* InfoPlist.strings */,
+				D1DC25FE28A4F10700D141AD /* super-parakeet */,
+				D12CC78F28AC51C100D828C0 /* super-parakeet-sharext */,
+				D1DC25FD28A4F10700D141AD /* Products */,
+				54F685984FAB48F0E5328EB7 /* Pods */,
+				5A7154DD829AF69E0F6EFF99 /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		D1DC25FD28A4F10700D141AD /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				D1DC25FC28A4F10700D141AD /* super-parakeet.app */,
+				D12CC78E28AC51C100D828C0 /* super-parakeet-sharext.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		D1DC25FE28A4F10700D141AD /* super-parakeet */ = {
+			isa = PBXGroup;
+			children = (
+				D1512A3528B4687E000A8886 /* View */,
+				D1DC263928AA279000D141AD /* Service */,
+				D1DC263428A4F59B00D141AD /* Components */,
+				D1DC262D28A4F3EE00D141AD /* Model */,
+				D1DC262A28A4F33E00D141AD /* Configuration */,
+				D1DC262928A4F1E300D141AD /* super-parakeet.entitlements */,
+				D1DC25FF28A4F10700D141AD /* super_parakeetApp.swift */,
+				D1DC260328A4F10700D141AD /* Assets.xcassets */,
+				D1DC260528A4F10700D141AD /* Preview Content */,
+				D1D8F76828CC376B006A310B /* info.plist */,
+			);
+			path = "super-parakeet";
+			sourceTree = "<group>";
+		};
+		D1DC260528A4F10700D141AD /* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				D1DC260628A4F10700D141AD /* Preview Assets.xcassets */,
+			);
+			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		D1DC262A28A4F33E00D141AD /* Configuration */ = {
+			isa = PBXGroup;
+			children = (
+				D1DC263028A4F56A00D141AD /* UIColorExt.swift */,
+				D1DC263128A4F56A00D141AD /* UIConfiguration.swift */,
+				D122936328AECFDE00AFB2AE /* Extensions.swift */,
+				D1512A3328B46126000A8886 /* Messages.swift */,
+			);
+			path = Configuration;
+			sourceTree = "<group>";
+		};
+		D1DC262D28A4F3EE00D141AD /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				D122936728B042BF00AFB2AE /* PrintJobs.swift */,
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
+		D1DC263428A4F59B00D141AD /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				D1DC263528A4F5A500D141AD /* CustomModifier.swift */,
+				D1DC263628A4F5A500D141AD /* CustomTextField.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+		D1DC263928AA279000D141AD /* Service */ = {
+			isa = PBXGroup;
+			children = (
+				D1DC263A28AA27AD00D141AD /* Requests.swift */,
+				D122935F28AEC45800AFB2AE /* HapticManager.swift */,
+			);
+			path = Service;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		D12CC78D28AC51C100D828C0 /* super-parakeet-sharext */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D12CC79A28AC51C100D828C0 /* Build configuration list for PBXNativeTarget "super-parakeet-sharext" */;
+			buildPhases = (
+				D12CC78A28AC51C100D828C0 /* Sources */,
+				D12CC78B28AC51C100D828C0 /* Frameworks */,
+				D12CC78C28AC51C100D828C0 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "super-parakeet-sharext";
+			productName = "super-parakeet-sharext";
+			productReference = D12CC78E28AC51C100D828C0 /* super-parakeet-sharext.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		D1DC25FB28A4F10700D141AD /* super-parakeet */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D1DC262028A4F10700D141AD /* Build configuration list for PBXNativeTarget "super-parakeet" */;
+			buildPhases = (
+				342B8A5B31781F01C78C77D3 /* [CP] Check Pods Manifest.lock */,
+				D1DC25F828A4F10700D141AD /* Sources */,
+				D1DC25F928A4F10700D141AD /* Frameworks */,
+				D1DC25FA28A4F10700D141AD /* Resources */,
+				B2AD7A7A228E7EB794B49769 /* [CP] Embed Pods Frameworks */,
+				D138E9A028CE92BF00F588E6 /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				D138E99F28CE92BF00F588E6 /* PBXTargetDependency */,
+			);
+			name = "super-parakeet";
+			productName = "super-parakeet";
+			productReference = D1DC25FC28A4F10700D141AD /* super-parakeet.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		D1DC25F428A4F10700D141AD /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1340;
+				LastUpgradeCheck = 1340;
+				TargetAttributes = {
+					D12CC78D28AC51C100D828C0 = {
+						CreatedOnToolsVersion = 13.4.1;
+					};
+					D1DC25FB28A4F10700D141AD = {
+						CreatedOnToolsVersion = 13.4.1;
+					};
+				};
+			};
+			buildConfigurationList = D1DC25F728A4F10700D141AD /* Build configuration list for PBXProject "super-parakeet" */;
+			compatibilityVersion = "Xcode 13.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+				ko,
+			);
+			mainGroup = D1DC25F328A4F10700D141AD;
+			productRefGroup = D1DC25FD28A4F10700D141AD /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				D1DC25FB28A4F10700D141AD /* super-parakeet */,
+				D12CC78D28AC51C100D828C0 /* super-parakeet-sharext */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		D12CC78C28AC51C100D828C0 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D12CC79D28AC51C700D828C0 /* Assets.xcassets in Resources */,
+				D1495E2528C32AD000D64E18 /* InfoPlist.strings in Resources */,
+				D12CC79428AC51C100D828C0 /* MainInterface.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D1DC25FA28A4F10700D141AD /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D1DC260728A4F10700D141AD /* Preview Assets.xcassets in Resources */,
+				D1495E2428C32AD000D64E18 /* InfoPlist.strings in Resources */,
+				D1DC260428A4F10700D141AD /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		342B8A5B31781F01C78C77D3 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-super-parakeet-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		B2AD7A7A228E7EB794B49769 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-super-parakeet/Pods-super-parakeet-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-super-parakeet/Pods-super-parakeet-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-super-parakeet/Pods-super-parakeet-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		D12CC78A28AC51C100D828C0 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D12CC79128AC51C100D828C0 /* ShareViewController.swift in Sources */,
+				D122936928B042BF00AFB2AE /* PrintJobs.swift in Sources */,
+				D12CC79E28AE138D00D828C0 /* CustomModifier.swift in Sources */,
+				D12CC7A028AE14CA00D828C0 /* UIConfiguration.swift in Sources */,
+				D12CC7A128AE14EF00D828C0 /* UIColorExt.swift in Sources */,
+				D122936128AEC45800AFB2AE /* HapticManager.swift in Sources */,
+				D1512A3928B46920000A8886 /* ShareView.swift in Sources */,
+				D12CC79F28AE139000D828C0 /* CustomTextField.swift in Sources */,
+				D122936528AECFDE00AFB2AE /* Extensions.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D1DC25F828A4F10700D141AD /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D1DC260228A4F10700D141AD /* MainView.swift in Sources */,
+				D122936428AECFDE00AFB2AE /* Extensions.swift in Sources */,
+				D1512A3728B46897000A8886 /* UploadStatusModalView.swift in Sources */,
+				D1DC263728A4F5A500D141AD /* CustomModifier.swift in Sources */,
+				D122936028AEC45800AFB2AE /* HapticManager.swift in Sources */,
+				D1DC263828A4F5A500D141AD /* CustomTextField.swift in Sources */,
+				D1D8F76F28CC7F96006A310B /* GoogleADView.swift in Sources */,
+				D1512A3428B46126000A8886 /* Messages.swift in Sources */,
+				D1DC263B28AA27AD00D141AD /* Requests.swift in Sources */,
+				D1DC263228A4F56A00D141AD /* UIColorExt.swift in Sources */,
+				D122936828B042BF00AFB2AE /* PrintJobs.swift in Sources */,
+				D1DC263328A4F56A00D141AD /* UIConfiguration.swift in Sources */,
+				D1DC260028A4F10700D141AD /* super_parakeetApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		D138E99F28CE92BF00F588E6 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D12CC78D28AC51C100D828C0 /* super-parakeet-sharext */;
+			targetProxy = D138E99E28CE92BF00F588E6 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		D12CC79228AC51C100D828C0 /* MainInterface.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				D12CC79328AC51C100D828C0 /* Base */,
+				D1495E2828C32AE200D64E18 /* ko */,
+			);
+			name = MainInterface.storyboard;
+			sourceTree = "<group>";
+		};
+		D1495E2728C32AD000D64E18 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				D1495E2628C32AD000D64E18 /* en */,
+				D1495E2928C32AE200D64E18 /* ko */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		D12CC79B28AC51C100D828C0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = "super-parakeet-sharext/super-parakeet-sharext.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 3BAL9BR86N;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "super-parakeet-sharext/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "super-parakeet-sharext";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.kyoungsuekim.super-parakeet.super-parakeet-sharext";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		D12CC79C28AC51C100D828C0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = "super-parakeet-sharext/super-parakeet-sharext.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 3BAL9BR86N;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "super-parakeet-sharext/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "super-parakeet-sharext";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.kyoungsuekim.super-parakeet.super-parakeet-sharext";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		D1DC261E28A4F10700D141AD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.5;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				OTHER_CODE_SIGN_FLAGS = "";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		D1DC261F28A4F10700D141AD /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.5;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				OTHER_CODE_SIGN_FLAGS = "";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		D1DC262128A4F10700D141AD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 11D85BFF05556E7C0D25C4CA /* Pods-super-parakeet.debug.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "super-parakeet/super-parakeet.entitlements";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"super-parakeet/Preview Content\"";
+				DEVELOPMENT_TEAM = 3BAL9BR86N;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				"INFOPLIST_FILE[sdk=*]" = "/Users/kyounsuekim/xcode/super-parakeet/super-parakeet/info.plist";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				OTHER_CODE_SIGN_FLAGS = "";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.kyoungsuekim.super-parakeet";
+				PRODUCT_NAME = "super-parakeet";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		D1DC262228A4F10700D141AD /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = F5ECC684FDC831AD457B6A86 /* Pods-super-parakeet.release.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "super-parakeet/super-parakeet.entitlements";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"super-parakeet/Preview Content\"";
+				DEVELOPMENT_TEAM = 3BAL9BR86N;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				"INFOPLIST_FILE[sdk=*]" = "/Users/kyounsuekim/xcode/super-parakeet/super-parakeet/info.plist";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				OTHER_CODE_SIGN_FLAGS = "";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.kyoungsuekim.super-parakeet";
+				PRODUCT_NAME = "super-parakeet";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		D12CC79A28AC51C100D828C0 /* Build configuration list for PBXNativeTarget "super-parakeet-sharext" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D12CC79B28AC51C100D828C0 /* Debug */,
+				D12CC79C28AC51C100D828C0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D1DC25F728A4F10700D141AD /* Build configuration list for PBXProject "super-parakeet" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D1DC261E28A4F10700D141AD /* Debug */,
+				D1DC261F28A4F10700D141AD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D1DC262028A4F10700D141AD /* Build configuration list for PBXNativeTarget "super-parakeet" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D1DC262128A4F10700D141AD /* Debug */,
+				D1DC262228A4F10700D141AD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = D1DC25F428A4F10700D141AD /* Project object */;
+}
