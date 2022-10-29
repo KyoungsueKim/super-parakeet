@@ -28,3 +28,5 @@ cd super-parakeet
 <img width="1174" alt="image" src="https://user-images.githubusercontent.com/61102713/198851078-fb247c78-0562-4a32-9b0d-ef8651bab7c1.png">
 
 * pdf를 처리하는 프린팅 서버의 주소를 바꾸고 싶다면 'super-parakeet/Service/Requests.swift' 파일 안의 url 상수를 변경하세요. 해당 서버를 돌리기 위한 도커 컨테이너는 https://github.com/KyoungsueKim/verbose-waffle 를 확인하시기 바랍니다.
+<img width="929" alt="image" src="https://user-images.githubusercontent.com/61102713/198853316-20aef182-f399-4f1e-bd00-d76442519855.png">
+
