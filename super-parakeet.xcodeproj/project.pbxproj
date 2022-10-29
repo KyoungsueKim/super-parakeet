@@ -26,7 +26,6 @@
 		D1512A3428B46126000A8886 /* Messages.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1512A3328B46126000A8886 /* Messages.swift */; };
 		D1512A3728B46897000A8886 /* UploadStatusModalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1512A3628B46897000A8886 /* UploadStatusModalView.swift */; };
 		D1512A3928B46920000A8886 /* ShareView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1512A3828B46920000A8886 /* ShareView.swift */; };
-		D1CE34E928C30B4200FC45D7 /* Pods_super_parakeet.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4E04AA76765CF341329362E5 /* Pods_super_parakeet.framework */; };
 		D1D8F76F28CC7F96006A310B /* GoogleADView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1D8F76E28CC7F96006A310B /* GoogleADView.swift */; };
 		D1DC260028A4F10700D141AD /* super_parakeetApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1DC25FF28A4F10700D141AD /* super_parakeetApp.swift */; };
 		D1DC260228A4F10700D141AD /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1DC260128A4F10700D141AD /* MainView.swift */; };
@@ -64,10 +63,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		0D1EFCD0149DFA2D12BF59DA /* Pods_super_parakeetTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_super_parakeetTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		11D85BFF05556E7C0D25C4CA /* Pods-super-parakeet.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-super-parakeet.debug.xcconfig"; path = "Target Support Files/Pods-super-parakeet/Pods-super-parakeet.debug.xcconfig"; sourceTree = "<group>"; };
-		4D1FA73E42230F811ADE49AC /* Pods_super_parakeet_super_parakeetUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_super_parakeet_super_parakeetUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		4E04AA76765CF341329362E5 /* Pods_super_parakeet.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_super_parakeet.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		D122935F28AEC45800AFB2AE /* HapticManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticManager.swift; sourceTree = "<group>"; };
 		D122936328AECFDE00AFB2AE /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		D122936728B042BF00AFB2AE /* PrintJobs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrintJobs.swift; sourceTree = "<group>"; };
@@ -110,7 +106,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D1CE34E928C30B4200FC45D7 /* Pods_super_parakeet.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -124,16 +119,6 @@
 				F5ECC684FDC831AD457B6A86 /* Pods-super-parakeet.release.xcconfig */,
 			);
 			path = Pods;
-			sourceTree = "<group>";
-		};
-		5A7154DD829AF69E0F6EFF99 /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-				4E04AA76765CF341329362E5 /* Pods_super_parakeet.framework */,
-				4D1FA73E42230F811ADE49AC /* Pods_super_parakeet_super_parakeetUITests.framework */,
-				0D1EFCD0149DFA2D12BF59DA /* Pods_super_parakeetTests.framework */,
-			);
-			name = Frameworks;
 			sourceTree = "<group>";
 		};
 		D12CC78F28AC51C100D828C0 /* super-parakeet-sharext */ = {
@@ -166,7 +151,6 @@
 				D12CC78F28AC51C100D828C0 /* super-parakeet-sharext */,
 				D1DC25FD28A4F10700D141AD /* Products */,
 				54F685984FAB48F0E5328EB7 /* Pods */,
-				5A7154DD829AF69E0F6EFF99 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
