@@ -39,13 +39,11 @@ struct MainView: View {
                     printStack(phoneNumber: $phoneNumber, isLogin: $isLogin)
                     
                     List {
-                        if let jobs = printJobs.GetJobs() {
-                            ForEach(jobs, id: \.self) { url in
-                                let documentName = (url as NSString).lastPathComponent.removingPercentEncoding!
-                                documentElement(icon: "doc.plaintext", documentName: "\(documentName)")
-                            }
-                            .onDelete(perform: removeRows)
+                        ForEach(printJobs.GetJobs(), id: \.self) { url in
+                            let documentName = (url as NSString).lastPathComponent.removingPercentEncoding!
+                            documentElement(icon: "doc.plaintext", documentName: "\(documentName)")
                         }
+                        .onDelete(perform: removeRows)
                     }
                     .lineSpacing(20)
                     .cornerRadius(13)
@@ -79,7 +77,7 @@ struct loginStack: View{
     var body: some View{
         VStack(spacing: 15){
             Text("휴대폰 번호를 입력하고 로그인 버튼을 누르세요")
-                .modifier(TextModifier(font: UIConfiguration.middleFont))
+                .modifier(TextModifier(font: UIConfiguration.middleFont, color: .label))
                 .padding(.horizontal, 60)
             
             HStack {
