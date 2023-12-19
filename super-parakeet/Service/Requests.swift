@@ -21,7 +21,7 @@ private func HttpRequest(urlString: String, phoneNumber: String, onSuccessCount:
 //    let port = "64550"
 //    let url = URL(string: "\(ip):\(port)/upload_file/")
     
-    let url = URL(string: "https://verbose-waffle.jollyrock-baa25231.koreacentral.azurecontainerapps.io/upload_file/")
+    let url = URL(string: "https://print.kksoft.kr:64550/upload_file/")
     var fileURL = URL(string: urlString)
     let parameters: [String : Any] = [
         "phone_number": phoneNumber
