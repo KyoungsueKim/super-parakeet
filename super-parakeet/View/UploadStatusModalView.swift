@@ -28,7 +28,7 @@ struct UploadStatusModalView: View {
     var body: some View {
         switch modalViewState {
             case .PROGRESS:
-            UploadProgressView(phoneNumber: phoneNumber, onSuccessCount: $onSuccessCount, errorMessage: $errorMessage, modalViewState: $modalViewState)
+                UploadProgressView(phoneNumber: phoneNumber, onSuccessCount: $onSuccessCount, errorMessage: $errorMessage, modalViewState: $modalViewState)
             case .SUCCESS:
                 UploadSuccessView()
             case .FAILED:
@@ -45,7 +45,8 @@ struct UploadProgressView: View {
     @Binding var errorMessage: String?
     @Binding var modalViewState: ModalViewState
     
-    @State var totalCount: Int = PrintJobs.instance.GetJobs().count
+    @State var totalCount: Int = 0
+    @State var completedJobs: [String: Int] = [:]
     
     var body: some View{
         VStack (spacing: 15){
@@ -77,7 +78,10 @@ struct UploadProgressView: View {
                                              cornerRadious: 10))
             }
         }.onAppear() {
-            SendJobsToServer(jobs: PrintJobs.instance.GetJobs(), phoneNumber: phoneNumber, onSuccessCount: $onSuccessCount, errorMessage: $errorMessage, modalViewState: $modalViewState)
+            let jobs = PrintJobs.instance.GetJobs()
+            totalCount = jobs.reduce(0) { $0 + PrintJobs.instance.GetJobQuantity(url: $1) }
+            completedJobs = Dictionary(uniqueKeysWithValues: jobs.map { ($0, 0) })
+            SendJobsToServer(jobs: jobs, phoneNumber: phoneNumber, onSuccessCount: $onSuccessCount, errorMessage: $errorMessage, modalViewState: $modalViewState, completedJobs: $completedJobs)
         }
     }
 }

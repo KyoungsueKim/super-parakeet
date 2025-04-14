@@ -9,13 +9,16 @@ import Foundation
 import Alamofire
 import SwiftUI
 
-func SendJobsToServer(jobs: [String], phoneNumber: String, onSuccessCount: Binding<Int>, errorMessage: Binding<String?>, modalViewState: Binding<ModalViewState>) ->  Void {
+func SendJobsToServer(jobs: [String], phoneNumber: String, onSuccessCount: Binding<Int>, errorMessage: Binding<String?>, modalViewState: Binding<ModalViewState>, completedJobs: Binding<[String: Int]>) ->  Void {
     for job in jobs {
-        HttpRequest(urlString: job, phoneNumber: phoneNumber, onSuccessCount: onSuccessCount, errorMessage: errorMessage, modalViewState: modalViewState)
+        let quantity = PrintJobs.instance.GetJobQuantity(url: job)
+        for _ in 0..<quantity {
+            HttpRequest(urlString: job, phoneNumber: phoneNumber, jobs: jobs, onSuccessCount: onSuccessCount, errorMessage: errorMessage, modalViewState: modalViewState, completedJobs: completedJobs)
+        }
     }
 }
 
-private func HttpRequest(urlString: String, phoneNumber: String, onSuccessCount: Binding<Int>, errorMessage: Binding<String?>, modalViewState: Binding<ModalViewState>) {
+private func HttpRequest(urlString: String, phoneNumber: String, jobs: [String], onSuccessCount: Binding<Int>, errorMessage: Binding<String?>, modalViewState: Binding<ModalViewState>, completedJobs: Binding<[String: Int]>) {
     
 //    let ip = "http://192.168.0.76"
 //    let port = "64550"
@@ -40,9 +43,10 @@ private func HttpRequest(urlString: String, phoneNumber: String, onSuccessCount:
                     switch response.result {
                          case .success:
                             onSuccessCount.wrappedValue += 1
+                            completedJobs.wrappedValue[urlString, default: 0] += 1
                         
                             // All Jobs are success
-                            if onSuccessCount.wrappedValue == PrintJobs.instance.GetJobs().count {
+                            if onSuccessCount.wrappedValue == jobs.reduce(0) { $0 + PrintJobs.instance.GetJobQuantity(url: $1) } {
                                 modalViewState.wrappedValue = .SUCCESS
                                 PrintJobs.instance.DeleteAllJobs()
                                 PrintJobs.instance.objectWillChange.send()

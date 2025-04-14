@@ -42,7 +42,9 @@ struct MainView: View {
                         List {
                             ForEach(printJobs.GetJobs(), id: \.self) { url in
                                 let documentName = (url as NSString).lastPathComponent.removingPercentEncoding!
-                                documentElement(icon: "doc.plaintext", documentName: "\(documentName)")
+                                documentElement(icon: "doc.plaintext", documentName: "\(documentName)", url: url)
+                                    .listRowBackground(Color.clear)
+                                    .listRowInsets(EdgeInsets())
                             }
                             .onDelete(perform: removeRows)
                         }
@@ -168,6 +170,9 @@ struct printStack: View{
 struct documentElement: View {
     var icon: String
     var documentName: String
+    var url: String
+    
+    @ObservedObject var printJobs = PrintJobs.instance
     
     var body: some View {
         HStack (spacing: 15){
@@ -180,8 +185,43 @@ struct documentElement: View {
                     .lineLimit(1)
                     .modifier(TextModifier(font: UIConfiguration.listFont))
             }
+            
+            Spacer()
+            
+            HStack(spacing: 8) {
+                // 빼기 버튼
+                Button(action: {
+                    let currentQuantity = printJobs.GetJobQuantity(url: url)
+                    if currentQuantity > 1 {
+                        printJobs.SetJobQuantity(url: url, quantity: currentQuantity - 1)
+                        printJobs.objectWillChange.send()
+                    }
+                }) {
+                    Image(systemName: "minus.circle.fill")
+                        .foregroundColor(.gray)
+                        .font(.system(size: 20))
+                }
+                .buttonStyle(PlainButtonStyle())
+                
+                Text("\(printJobs.GetJobQuantity(url: url))")
+                    .modifier(TextModifier(font: UIConfiguration.listFont))
+                    .frame(width: 30)
+                
+                // 추가 버튼
+                Button(action: {
+                    let currentQuantity = printJobs.GetJobQuantity(url: url)
+                    printJobs.SetJobQuantity(url: url, quantity: currentQuantity + 1)
+                    printJobs.objectWillChange.send()
+                }) {
+                    Image(systemName: "plus.circle.fill")
+                        .foregroundColor(.gray)
+                        .font(.system(size: 20))
+                }
+                .buttonStyle(PlainButtonStyle())
+            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+        .contentShape(Rectangle())
     }
 }
 
