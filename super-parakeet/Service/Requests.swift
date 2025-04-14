@@ -27,7 +27,8 @@ private func HttpRequest(urlString: String, phoneNumber: String, jobs: [String],
     let url = URL(string: "https://print.kksoft.kr:64550/upload_file/")
     var fileURL = URL(string: urlString)
     let parameters: [String : Any] = [
-        "phone_number": phoneNumber
+        "phone_number": phoneNumber,
+        "is_a3": PrintJobs.instance.GetJobIsA3(url: urlString)
     ]
 
     if let fileURL = fileURL, let url = url {
@@ -42,20 +43,24 @@ private func HttpRequest(urlString: String, phoneNumber: String, jobs: [String],
                 .response { response in
                     switch response.result {
                          case .success:
-                            onSuccessCount.wrappedValue += 1
-                            completedJobs.wrappedValue[urlString, default: 0] += 1
-                        
-                            // All Jobs are success
-                            if onSuccessCount.wrappedValue == jobs.reduce(0) { $0 + PrintJobs.instance.GetJobQuantity(url: $1) } {
-                                modalViewState.wrappedValue = .SUCCESS
-                                PrintJobs.instance.DeleteAllJobs()
-                                PrintJobs.instance.objectWillChange.send()
+                            DispatchQueue.main.async {
+                                onSuccessCount.wrappedValue += 1
+                                completedJobs.wrappedValue[urlString, default: 0] += 1
+                                
+                                // All Jobs are success
+                                if onSuccessCount.wrappedValue == jobs.reduce(0, { $0 + PrintJobs.instance.GetJobQuantity(url: $1) }) {
+                                    modalViewState.wrappedValue = .SUCCESS
+                                    PrintJobs.instance.DeleteAllJobs()
+                                    PrintJobs.instance.objectWillChange.send()
+                                }
                             }
                         
                          case .failure(let error):
-                            errorMessage.wrappedValue = error.errorDescription
-                            modalViewState.wrappedValue = .FAILED
-                            print(error)
+                            DispatchQueue.main.async {
+                                errorMessage.wrappedValue = error.errorDescription
+                                modalViewState.wrappedValue = .FAILED
+                                print(error)
+                            }
                     }
                     
                     debugPrint(response)

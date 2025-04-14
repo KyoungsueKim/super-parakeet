@@ -11,6 +11,7 @@ class PrintJobs: ObservableObject {
     static let instance = PrintJobs()
     
     private var jobQuantities: [String: Int] = [:]
+    private var jobIsA3: [String: Bool] = [:]
     
     func GetJobs() -> [String] {
         return UserDefaults.shared.stringArray(forKey: "printQueue") ?? []
@@ -24,6 +25,14 @@ class PrintJobs: ObservableObject {
         jobQuantities[url] = quantity
     }
     
+    func GetJobIsA3(url: String) -> Bool {
+        return jobIsA3[url] ?? false
+    }
+    
+    func SetJobIsA3(url: String, isA3: Bool) {
+        jobIsA3[url] = isA3
+    }
+    
     func AddJobs(url: String) {
         var printJobs = GetJobs()
         printJobs.append(url)
@@ -35,6 +44,7 @@ class PrintJobs: ObservableObject {
         var printJobs = GetJobs()
         let url = printJobs[index]
         jobQuantities.removeValue(forKey: url)
+        jobIsA3.removeValue(forKey: url)
         printJobs.remove(at: index)
         UserDefaults.shared.set(printJobs, forKey: "printQueue")
         self.objectWillChange.send()
@@ -42,6 +52,7 @@ class PrintJobs: ObservableObject {
     
     func DeleteAllJobs() {
         jobQuantities.removeAll()
+        jobIsA3.removeAll()
         UserDefaults.shared.removeObject(forKey: "printQueue")
         self.objectWillChange.send()
     }

@@ -189,6 +189,23 @@ struct documentElement: View {
             Spacer()
             
             HStack(spacing: 8) {
+                // A3/A4 선택 버튼
+                Button(action: {
+                    let currentIsA3 = printJobs.GetJobIsA3(url: url)
+                    printJobs.SetJobIsA3(url: url, isA3: !currentIsA3)
+                    printJobs.objectWillChange.send()
+                }) {
+                    Text(printJobs.GetJobIsA3(url: url) ? "A3" : "A4")
+                        .modifier(TextModifier(font: UIConfiguration.listFont))
+                        .frame(width: 40)
+                        .padding(.vertical, 4)
+                        .background(
+                            RoundedRectangle(cornerRadius: 4)
+                                .stroke(Color.gray, lineWidth: 1)
+                        )
+                }
+                .buttonStyle(PlainButtonStyle())
+                
                 // 빼기 버튼
                 Button(action: {
                     let currentQuantity = printJobs.GetJobQuantity(url: url)
