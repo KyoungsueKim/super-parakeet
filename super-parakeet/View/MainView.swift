@@ -38,20 +38,28 @@ struct MainView: View {
                 VStack(spacing: 20){
                     printStack(phoneNumber: $phoneNumber, isLogin: $isLogin)
                     
-                    List {
-                        ForEach(printJobs.GetJobs(), id: \.self) { url in
-                            let documentName = (url as NSString).lastPathComponent.removingPercentEncoding!
-                            documentElement(icon: "doc.plaintext", documentName: "\(documentName)")
+                    ZStack {
+                        List {
+                            ForEach(printJobs.GetJobs(), id: \.self) { url in
+                                let documentName = (url as NSString).lastPathComponent.removingPercentEncoding!
+                                documentElement(icon: "doc.plaintext", documentName: "\(documentName)")
+                            }
+                            .onDelete(perform: removeRows)
                         }
-                        .onDelete(perform: removeRows)
+                        .listStyle(PlainListStyle())
+                        .lineSpacing(20)
+                        .cornerRadius(13)
+                        .padding(.horizontal, 15)
+                        .frame(width: UIScreen.main.bounds.width - 30, alignment: .center)
+                        .refreshable {
+                            printJobs.objectWillChange.send()
+                        }
                     }
-                    .lineSpacing(20)
-                    .cornerRadius(13)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 13)
+                            .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                    )
                     .padding(.horizontal, 15)
-                    .frame(width: .infinity, alignment: .center)
-                    .refreshable {
-                        printJobs.objectWillChange.send()
-                    }
                     
                     GoogleAdView()
                         .frame(width: UIScreen.main.bounds.width > 400 ? 400 : UIScreen.main.bounds.width, height: 50, alignment: .center)
@@ -173,8 +181,7 @@ struct documentElement: View {
                     .modifier(TextModifier(font: UIConfiguration.listFont))
             }
         }
-        .frame(alignment: .center)
-        
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 
