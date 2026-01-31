@@ -19,6 +19,8 @@ struct MainView: View {
     @State private var didRewardedAdReward: Bool = false
     @State private var didRewardedInterstitialReward: Bool = false
     @State private var didInterstitialAdShown: Bool = false
+    @State private var showAppOpenPrompt: Bool = false
+    @State private var isAppOpenAdEnabled: Bool = AppOpenAdPreference.isEnabled
     
     @ObservedObject var printJobs = PrintJobs.instance
     @StateObject private var rewardedAdFlowCoordinator = RewardedAdFlowCoordinator()
@@ -31,6 +33,10 @@ struct MainView: View {
                 .padding(.top, 100)
                 .onTapGesture(count: 3) {
                     showRewardedPrompt = true
+                }
+                .onLongPressGesture(minimumDuration: 3) {
+                    isAppOpenAdEnabled = AppOpenAdPreference.isEnabled
+                    showAppOpenPrompt = true
                 }
             
             Text("Ajou University Printing System")
@@ -101,6 +107,24 @@ struct MainView: View {
         } message: {
             Text(rewardResultMessage)
         }
+        .confirmationDialog("앱 오프닝 광고",
+                            isPresented: $showAppOpenPrompt,
+                            titleVisibility: .visible) {
+            if isAppOpenAdEnabled {
+                Button("비활성화", role: .destructive) {
+                    setAppOpenAdEnabled(false)
+                }
+            } else {
+                Button("활성화") {
+                    setAppOpenAdEnabled(true)
+                }
+            }
+            Button("취소", role: .cancel) { }
+        } message: {
+            Text(isAppOpenAdEnabled
+                 ? "앱 오프닝 광고를 비활성화하시겠습니까?"
+                 : "앱 오프닝 광고를 활성화하시겠습니까?")
+        }
     }
     
     func removeRows(at offsets: IndexSet) {
@@ -145,6 +169,15 @@ struct MainView: View {
             rewardResultMessage = earnedRewardMessages.joined(separator: "\n")
             showRewardResultAlert = true
         })
+    }
+
+    /// 앱 오프닝 광고 활성화 설정을 저장하고 광고 상태를 갱신합니다.
+    /// - Parameter isEnabled: 활성화 여부.
+    private func setAppOpenAdEnabled(_ isEnabled: Bool) {
+        AppOpenAdPreference.isEnabled = isEnabled
+        isAppOpenAdEnabled = isEnabled
+        let rootViewController = UIApplication.shared.topViewController()
+        AppOpenAdManager.shared.updatePreference(isEnabled: isEnabled, viewController: rootViewController)
     }
 }
 

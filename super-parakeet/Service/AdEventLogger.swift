@@ -14,6 +14,7 @@ enum AdEventLogger {
         case rewarded = "Rewarded"
         case rewardedInterstitial = "RewardedInterstitial"
         case interstitial = "Interstitial"
+        case appOpen = "AppOpen"
         case flow = "Flow"
     }
 

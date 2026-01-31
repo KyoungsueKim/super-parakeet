@@ -45,6 +45,9 @@
 		F8552A6F2F2E419000E99086 /* RewardedInterstitialAdManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8552A6E2F2E419000E99086 /* RewardedInterstitialAdManager.swift */; };
 		F8552A712F2E4CED00E99086 /* InterstitialAdManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8552A702F2E4CED00E99086 /* InterstitialAdManager.swift */; };
 		F8552A732F2E4FA500E99086 /* AdEventLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8552A722F2E4FA500E99086 /* AdEventLogger.swift */; };
+		F8552A772F2E5B3000E99086 /* AppOpenAdPreference.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8552A762F2E5B3000E99086 /* AppOpenAdPreference.swift */; };
+		F8552A782F2E5B3000E99086 /* AppOpenAdManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8552A752F2E5B3000E99086 /* AppOpenAdManager.swift */; };
+		F8552A792F2E5B3000E99086 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8552A742F2E5B3000E99086 /* AppDelegate.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -110,6 +113,9 @@
 		F8552A6E2F2E419000E99086 /* RewardedInterstitialAdManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RewardedInterstitialAdManager.swift; sourceTree = "<group>"; };
 		F8552A702F2E4CED00E99086 /* InterstitialAdManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InterstitialAdManager.swift; sourceTree = "<group>"; };
 		F8552A722F2E4FA500E99086 /* AdEventLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdEventLogger.swift; sourceTree = "<group>"; };
+		F8552A742F2E5B3000E99086 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		F8552A752F2E5B3000E99086 /* AppOpenAdManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppOpenAdManager.swift; sourceTree = "<group>"; };
+		F8552A762F2E5B3000E99086 /* AppOpenAdPreference.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppOpenAdPreference.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -257,6 +263,9 @@
 				F8552A6E2F2E419000E99086 /* RewardedInterstitialAdManager.swift */,
 				F8552A702F2E4CED00E99086 /* InterstitialAdManager.swift */,
 				F8552A722F2E4FA500E99086 /* AdEventLogger.swift */,
+				F8552A742F2E5B3000E99086 /* AppDelegate.swift */,
+				F8552A752F2E5B3000E99086 /* AppOpenAdManager.swift */,
+				F8552A762F2E5B3000E99086 /* AppOpenAdPreference.swift */,
 			);
 			path = Service;
 			sourceTree = "<group>";
@@ -463,6 +472,9 @@
 				D1D8F76F28CC7F96006A310B /* GoogleADView.swift in Sources */,
 				2999E47973DC45F5A7DBBF50 /* AdMobInitializer.swift in Sources */,
 				D1512A3428B46126000A8886 /* Messages.swift in Sources */,
+				F8552A772F2E5B3000E99086 /* AppOpenAdPreference.swift in Sources */,
+				F8552A782F2E5B3000E99086 /* AppOpenAdManager.swift in Sources */,
+				F8552A792F2E5B3000E99086 /* AppDelegate.swift in Sources */,
 				D1DC263B28AA27AD00D141AD /* Requests.swift in Sources */,
 				D1DC263228A4F56A00D141AD /* UIColorExt.swift in Sources */,
 				D122936828B042BF00AFB2AE /* PrintJobs.swift in Sources */,

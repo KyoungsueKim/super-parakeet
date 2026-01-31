@@ -9,6 +9,8 @@ import SwiftUI
 
 @main
 struct super_parakeetApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+
     init() {
         AdMobInitializer.start()
     }
