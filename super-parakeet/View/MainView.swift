@@ -124,14 +124,14 @@ struct MainView: View {
                                                       onRewardedAdReward: {
             didRewardedAdReward = true
             earnedRewardMessages.append("보상형 광고 보상이 지급되었습니다.")
-        }, onRewardedAdFailure: {
-            rewardResultMessage = "현재 광고를 불러올 수 없습니다. 잠시 후 다시 시도해주세요."
-            showRewardResultAlert = true
         }, onRewardedInterstitialReward: {
             didRewardedInterstitialReward = true
             earnedRewardMessages.append("보상형 전면 광고 보상이 지급되었습니다.")
         }, onInterstitialShown: {
             didInterstitialAdShown = true
+        }, onAllAdsUnavailable: {
+            rewardResultMessage = "현재 광고를 불러올 수 없습니다. 잠시 후 다시 시도해주세요."
+            showRewardResultAlert = true
         }, onFlowFinished: {
             let shouldShowHiddenMessage = didRewardedAdReward
             && didRewardedInterstitialReward
