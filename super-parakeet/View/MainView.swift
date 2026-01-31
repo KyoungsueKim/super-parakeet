@@ -26,65 +26,74 @@ struct MainView: View {
     @StateObject private var rewardedAdFlowCoordinator = RewardedAdFlowCoordinator()
 
     var body: some View {
-        VStack(spacing: 20) {
-            Image(systemName: "printer")
-                .resizable()
-                .frame(width: 120, height: 120, alignment: .center)
-                .padding(.top, 100)
-                .onTapGesture(count: 3) {
-                    showRewardedPrompt = true
-                }
-                .onLongPressGesture(minimumDuration: 3) {
-                    isAppOpenAdEnabled = AppOpenAdPreference.isEnabled
-                    showAppOpenPrompt = true
-                }
-            
-            Text("Ajou University Printing System")
-                .modifier(TextModifier(font: UIConfiguration.titleFont,
-                                       color: UIConfiguration.ajouColor))
-                .padding(.horizontal, 60)
-            
-            // if not login
-            if (!isLogin) {
-                loginStack(phoneNumber: $phoneNumber, isLogin: $isLogin)
-                
-                BannerAdView()
-                    .frame(width: UIScreen.main.bounds.width > 400 ? 400 : UIScreen.main.bounds.width, height: 50, alignment: .center)
-            }
-            // if login
-            else {
-                VStack(spacing: 20){
-                    printStack(phoneNumber: $phoneNumber, isLogin: $isLogin)
-                    
-                    ZStack {
-                        List {
-                            ForEach(printJobs.GetJobs(), id: \.self) { url in
-                                let documentName = (url as NSString).lastPathComponent.removingPercentEncoding!
-                                documentElement(icon: "doc.plaintext", documentName: "\(documentName)", url: url)
-                                    .listRowBackground(Color.clear)
-                                    .listRowInsets(EdgeInsets())
-                            }
-                            .onDelete(perform: removeRows)
-                        }
-                        .listStyle(PlainListStyle())
-                        .lineSpacing(20)
-                        .cornerRadius(13)
-                        .padding(.horizontal, 15)
-                        .frame(width: UIScreen.main.bounds.width - 30, alignment: .center)
-                        .refreshable {
-                            printJobs.objectWillChange.send()
-                        }
+        ZStack(alignment: .topLeading) {
+            VStack(spacing: 20) {
+                Image(systemName: "printer")
+                    .resizable()
+                    .frame(width: 120, height: 120, alignment: .center)
+                    .padding(.top, 100)
+                    .onTapGesture(count: 3) {
+                        showRewardedPrompt = true
                     }
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 13)
-                            .stroke(Color.gray.opacity(0.3), lineWidth: 1)
-                    )
-                    .padding(.horizontal, 15)
+                    .onLongPressGesture(minimumDuration: 3) {
+                        isAppOpenAdEnabled = AppOpenAdPreference.isEnabled
+                        showAppOpenPrompt = true
+                    }
+                
+                Text("Ajou University Printing System")
+                    .modifier(TextModifier(font: UIConfiguration.titleFont,
+                                           color: UIConfiguration.ajouColor))
+                    .padding(.horizontal, 60)
+                
+                // if not login
+                if (!isLogin) {
+                    loginStack(phoneNumber: $phoneNumber, isLogin: $isLogin)
                     
                     BannerAdView()
                         .frame(width: UIScreen.main.bounds.width > 400 ? 400 : UIScreen.main.bounds.width, height: 50, alignment: .center)
-                        .padding(.bottom, 15)
                 }
+                // if login
+                else {
+                    VStack(spacing: 20){
+                        printStack(phoneNumber: $phoneNumber, isLogin: $isLogin)
+                        
+                        ZStack {
+                            List {
+                                ForEach(printJobs.GetJobs(), id: \.self) { url in
+                                    let documentName = (url as NSString).lastPathComponent.removingPercentEncoding!
+                                    documentElement(icon: "doc.plaintext", documentName: "\(documentName)", url: url)
+                                        .listRowBackground(Color.clear)
+                                        .listRowInsets(EdgeInsets())
+                                }
+                                .onDelete(perform: removeRows)
+                            }
+                            .listStyle(PlainListStyle())
+                            .lineSpacing(20)
+                            .cornerRadius(13)
+                            .padding(.horizontal, 15)
+                            .frame(width: UIScreen.main.bounds.width - 30, alignment: .center)
+                            .refreshable {
+                                printJobs.objectWillChange.send()
+                            }
+                        }
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 13)
+                                .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                        )
+                        .padding(.horizontal, 15)
+                        
+                        BannerAdView()
+                            .frame(width: UIScreen.main.bounds.width > 400 ? 400 : UIScreen.main.bounds.width, height: 50, alignment: .center)
+                            .padding(.bottom, 15)
+                    }
+                }
+            }
+            
+            if isLogin {
+                BackToLoginButton(action: moveToLogin)
+                    .padding(.leading, 16)
+                    .padding(.top, 12)
+                    .zIndex(1)
             }
         }
         .offset(y: isLogin ? 0 : -100)
@@ -129,6 +138,13 @@ struct MainView: View {
     
     func removeRows(at offsets: IndexSet) {
         PrintJobs.instance.RemoveJob(index: offsets.first!)
+    }
+
+    /// 로그인 상태로 이동하기 위해 입력 정보를 초기화합니다.
+    private func moveToLogin() {
+        KeyboardManager.dismiss()
+        phoneNumber = ""
+        isLogin = false
     }
 
     /// 보상형 광고를 요청하고 표시합니다.
@@ -181,6 +197,33 @@ struct MainView: View {
     }
 }
 
+/// 로그인 화면으로 돌아가기 위한 간단한 버튼 뷰입니다.
+struct BackToLoginButton: View {
+    /// 버튼 탭 시 수행할 동작입니다.
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: {
+            HapticFeedbackManager.lightImpact()
+            action()
+        }) {
+            Image(systemName: "chevron.left")
+                .font(.system(size: 18, weight: .semibold))
+                .foregroundColor(Color(UIConfiguration.ajouColor))
+                .padding(8)
+                .background(
+                    Circle()
+                        .fill(Color.white.opacity(0.9))
+                )
+                .overlay(
+                    Circle()
+                        .stroke(Color.gray.opacity(0.2), lineWidth: 1)
+                )
+        }
+        .accessibilityLabel("로그인 화면으로 돌아가기")
+    }
+}
+
 
 struct loginStack: View{
     @State private var showAlert: Bool = false
@@ -201,6 +244,8 @@ struct loginStack: View{
                     .keyboardType(.decimalPad)
                 
                 Button(action: {
+                    HapticFeedbackManager.lightImpact()
+                    KeyboardManager.dismiss()
                     let pattern = "010[0-9]{8}"
                     guard phoneNumber.count == 11 && phoneNumber.range(of: pattern, options: .regularExpression) != nil else {
                         showAlert = true
@@ -223,6 +268,25 @@ struct loginStack: View{
                 }
             }
         }
+    }
+}
+
+/// 키보드 제어를 담당하는 유틸리티입니다.
+enum KeyboardManager {
+    /// 현재 표시 중인 키보드를 내립니다.
+    static func dismiss() {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder),
+                                        to: nil,
+                                        from: nil,
+                                        for: nil)
+    }
+}
+
+/// 햅틱 피드백을 제공하는 유틸리티입니다.
+enum HapticFeedbackManager {
+    /// 가벼운 탭 피드백을 발생시킵니다.
+    static func lightImpact() {
+        UIImpactFeedbackGenerator(style: .light).impactOccurred()
     }
 }
 
