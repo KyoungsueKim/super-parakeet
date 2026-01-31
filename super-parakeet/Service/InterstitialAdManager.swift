@@ -1,5 +1,5 @@
 //
-//  RewardedAdManager.swift
+//  InterstitialAdManager.swift
 //  super-parakeet
 //
 //  Created by Codex on 2026/01/31.
@@ -9,99 +9,91 @@ import Foundation
 import GoogleMobileAds
 import UIKit
 
-/// 보상형 광고 로드와 표시를 담당하는 매니저.
-final class RewardedAdManager: NSObject, ObservableObject {
+/// 전면 광고 로드와 표시를 담당하는 매니저.
+final class InterstitialAdManager: NSObject, ObservableObject {
     /// 현재 광고가 표시 가능한 상태인지 여부.
     @Published private(set) var isAdReady: Bool = false
 
-    private var rewardedAd: RewardedAd?
+    private var interstitialAd: InterstitialAd?
     private var isLoading: Bool = false
     private var onDismissHandler: (() -> Void)?
     private var onFailureHandler: (() -> Void)?
 
-    /// 보상형 광고를 미리 로드합니다.
+    /// 전면 광고를 미리 로드합니다.
     func loadIfNeeded() {
-        guard rewardedAd == nil, isLoading == false else { return }
-        AdEventLogger.log(.rewarded, event: "loadIfNeeded")
+        guard interstitialAd == nil, isLoading == false else { return }
+        AdEventLogger.log(.interstitial, event: "loadIfNeeded")
         load(completion: nil)
     }
 
-    /// 보상형 광고를 로드합니다.
+    /// 전면 광고를 로드합니다.
     /// - Parameter completion: 로드 성공 여부 콜백.
     func load(completion: ((Bool) -> Void)?) {
-        AdEventLogger.log(.rewarded, event: "load:start")
+        AdEventLogger.log(.interstitial, event: "load:start")
         isLoading = true
         let request = Request()
 
-        RewardedAd.load(with: AdMobConfiguration.rewardedAdUnitID,
-                        request: request) { [weak self] ad, error in
+        InterstitialAd.load(with: AdMobConfiguration.interstitialAdUnitID,
+                            request: request) { [weak self] ad, error in
             guard let self = self else { return }
 
             DispatchQueue.main.async {
                 self.isLoading = false
 
                 if let _ = error {
-                    AdEventLogger.log(.rewarded, event: "load:failure")
-                    self.rewardedAd = nil
+                    AdEventLogger.log(.interstitial, event: "load:failure")
+                    self.interstitialAd = nil
                     self.isAdReady = false
                     completion?(false)
                     return
                 }
 
-                self.rewardedAd = ad
-                self.rewardedAd?.fullScreenContentDelegate = self
+                self.interstitialAd = ad
+                self.interstitialAd?.fullScreenContentDelegate = self
                 self.isAdReady = true
-                AdEventLogger.log(.rewarded, event: "load:success")
+                AdEventLogger.log(.interstitial, event: "load:success")
                 completion?(true)
             }
         }
     }
 
-    /// 보상형 광고를 표시합니다. 광고가 준비되지 않았으면 먼저 로드합니다.
+    /// 전면 광고를 표시합니다. 광고가 준비되지 않았으면 먼저 로드합니다.
     /// - Parameters:
     ///   - viewController: 표시 대상 루트 컨트롤러.
-    ///   - onReward: 보상 지급 시 호출되는 콜백.
     ///   - onFailure: 표시 실패 또는 로드 실패 시 호출되는 콜백.
     ///   - onDismiss: 광고가 종료된 직후 호출되는 콜백.
     func presentIfAvailable(from viewController: UIViewController,
-                            onReward: @escaping () -> Void,
                             onFailure: (() -> Void)? = nil,
                             onDismiss: (() -> Void)? = nil) {
-        if let rewardedAd = rewardedAd {
-            AdEventLogger.log(.rewarded, event: "present:ready")
+        if let interstitialAd = interstitialAd {
+            AdEventLogger.log(.interstitial, event: "present:ready")
             onDismissHandler = onDismiss
             onFailureHandler = onFailure
-            rewardedAd.present(from: viewController) {
-                AdEventLogger.log(.rewarded, event: "reward:earned")
-                onReward()
-            }
+            interstitialAd.present(from: viewController)
             return
         }
 
-        AdEventLogger.log(.rewarded, event: "present:loadAndShow")
+        AdEventLogger.log(.interstitial, event: "present:loadAndShow")
         load { [weak self] success in
             guard let self = self else { return }
-            guard success, let rewardedAd = self.rewardedAd else {
-                AdEventLogger.log(.rewarded, event: "present:loadFailure")
+            guard success, let interstitialAd = self.interstitialAd else {
+                AdEventLogger.log(.interstitial, event: "present:loadFailure")
                 onFailure?()
                 return
             }
 
             self.onDismissHandler = onDismiss
             self.onFailureHandler = onFailure
-            rewardedAd.present(from: viewController) {
-                AdEventLogger.log(.rewarded, event: "reward:earned")
-                onReward()
-            }
+            interstitialAd.present(from: viewController)
         }
     }
 }
 
-extension RewardedAdManager: FullScreenContentDelegate {
+extension InterstitialAdManager: FullScreenContentDelegate {
     func adDidDismissFullScreenContent(_ ad: FullScreenPresentingAd) {
         DispatchQueue.main.async {
-            AdEventLogger.log(.rewarded, event: "dismiss")
-            self.rewardedAd = nil
+            AdEventLogger.log(.interstitial, event: "dismiss")
+            self.interstitialAd = nil
             self.isAdReady = false
             let dismissHandler = self.onDismissHandler
             self.onDismissHandler = nil
@@ -113,8 +105,8 @@ extension RewardedAdManager: FullScreenContentDelegate {
 
     func ad(_ ad: FullScreenPresentingAd, didFailToPresentFullScreenContentWithError error: Error) {
         DispatchQueue.main.async {
-            AdEventLogger.log(.rewarded, event: "present:failure", detail: error.localizedDescription)
-            self.rewardedAd = nil
+            AdEventLogger.log(.interstitial, event: "present:failure", detail: error.localizedDescription)
+            self.interstitialAd = nil
             self.isAdReady = false
             let failureHandler = self.onFailureHandler
             self.onDismissHandler = nil

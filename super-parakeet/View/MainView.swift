@@ -16,6 +16,9 @@ struct MainView: View {
     @State private var showRewardResultAlert: Bool = false
     @State private var rewardResultMessage: String = ""
     @State private var earnedRewardMessages: [String] = []
+    @State private var didRewardedAdReward: Bool = false
+    @State private var didRewardedInterstitialReward: Bool = false
+    @State private var didInterstitialAdShown: Bool = false
     
     @ObservedObject var printJobs = PrintJobs.instance
     @StateObject private var rewardedAdFlowCoordinator = RewardedAdFlowCoordinator()
@@ -113,16 +116,31 @@ struct MainView: View {
         }
 
         earnedRewardMessages.removeAll()
+        didRewardedAdReward = false
+        didRewardedInterstitialReward = false
+        didInterstitialAdShown = false
 
         rewardedAdFlowCoordinator.presentRewardedFlow(from: rootViewController,
                                                       onRewardedAdReward: {
+            didRewardedAdReward = true
             earnedRewardMessages.append("보상형 광고 보상이 지급되었습니다.")
         }, onRewardedAdFailure: {
             rewardResultMessage = "현재 광고를 불러올 수 없습니다. 잠시 후 다시 시도해주세요."
             showRewardResultAlert = true
         }, onRewardedInterstitialReward: {
+            didRewardedInterstitialReward = true
             earnedRewardMessages.append("보상형 전면 광고 보상이 지급되었습니다.")
+        }, onInterstitialShown: {
+            didInterstitialAdShown = true
         }, onFlowFinished: {
+            let shouldShowHiddenMessage = didRewardedAdReward
+            && didRewardedInterstitialReward
+            && didInterstitialAdShown
+
+            if shouldShowHiddenMessage {
+                earnedRewardMessages.append("광고를 끝까지 참고 기다려주셔서 정말 감사합니다!! 이 화면을 캡쳐해서 zp5njqlfex@ajou.ac.kr 으로 메일 보내주시면 맛있는 기프티콘을 선물로 드리겠습니다 :)")
+            }
+
             guard earnedRewardMessages.isEmpty == false else { return }
             rewardResultMessage = earnedRewardMessages.joined(separator: "\n")
             showRewardResultAlert = true

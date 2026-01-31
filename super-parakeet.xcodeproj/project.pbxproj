@@ -43,6 +43,8 @@
 		F84D08392DAC874600F6F204 /* Pods_super_parakeet.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EECBBA9323E53E4B25EC09E1 /* Pods_super_parakeet.framework */; };
 		F8552A6D2F2E418200E99086 /* RewardedAdFlowCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8552A6C2F2E418200E99086 /* RewardedAdFlowCoordinator.swift */; };
 		F8552A6F2F2E419000E99086 /* RewardedInterstitialAdManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8552A6E2F2E419000E99086 /* RewardedInterstitialAdManager.swift */; };
+		F8552A712F2E4CED00E99086 /* InterstitialAdManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8552A702F2E4CED00E99086 /* InterstitialAdManager.swift */; };
+		F8552A732F2E4FA500E99086 /* AdEventLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8552A722F2E4FA500E99086 /* AdEventLogger.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -106,6 +108,8 @@
 		EECBBA9323E53E4B25EC09E1 /* Pods_super_parakeet.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_super_parakeet.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F8552A6C2F2E418200E99086 /* RewardedAdFlowCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RewardedAdFlowCoordinator.swift; sourceTree = "<group>"; };
 		F8552A6E2F2E419000E99086 /* RewardedInterstitialAdManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RewardedInterstitialAdManager.swift; sourceTree = "<group>"; };
+		F8552A702F2E4CED00E99086 /* InterstitialAdManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InterstitialAdManager.swift; sourceTree = "<group>"; };
+		F8552A722F2E4FA500E99086 /* AdEventLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdEventLogger.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -251,6 +255,8 @@
 				6329C3171FAE43A8868F61D4 /* RewardedAdManager.swift */,
 				F8552A6C2F2E418200E99086 /* RewardedAdFlowCoordinator.swift */,
 				F8552A6E2F2E419000E99086 /* RewardedInterstitialAdManager.swift */,
+				F8552A702F2E4CED00E99086 /* InterstitialAdManager.swift */,
+				F8552A722F2E4FA500E99086 /* AdEventLogger.swift */,
 			);
 			path = Service;
 			sourceTree = "<group>";
@@ -460,11 +466,13 @@
 				D1DC263B28AA27AD00D141AD /* Requests.swift in Sources */,
 				D1DC263228A4F56A00D141AD /* UIColorExt.swift in Sources */,
 				D122936828B042BF00AFB2AE /* PrintJobs.swift in Sources */,
+				F8552A712F2E4CED00E99086 /* InterstitialAdManager.swift in Sources */,
 				A3817E4F2C4C4FB19CFBC7C9 /* RewardedAdManager.swift in Sources */,
 				F8552A6D2F2E418200E99086 /* RewardedAdFlowCoordinator.swift in Sources */,
 				F8552A6F2F2E419000E99086 /* RewardedInterstitialAdManager.swift in Sources */,
 				D1DC263328A4F56A00D141AD /* UIConfiguration.swift in Sources */,
 				D1DC260028A4F10700D141AD /* super_parakeetApp.swift in Sources */,
+				F8552A732F2E4FA500E99086 /* AdEventLogger.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

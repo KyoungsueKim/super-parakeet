@@ -22,12 +22,14 @@ final class RewardedInterstitialAdManager: NSObject, ObservableObject {
     /// 보상형 전면 광고를 미리 로드합니다.
     func loadIfNeeded() {
         guard rewardedInterstitialAd == nil, isLoading == false else { return }
+        AdEventLogger.log(.rewardedInterstitial, event: "loadIfNeeded")
         load(completion: nil)
     }
 
     /// 보상형 전면 광고를 로드합니다.
     /// - Parameter completion: 로드 성공 여부 콜백.
     func load(completion: ((Bool) -> Void)?) {
+        AdEventLogger.log(.rewardedInterstitial, event: "load:start")
         isLoading = true
         let request = Request()
 
@@ -39,6 +41,7 @@ final class RewardedInterstitialAdManager: NSObject, ObservableObject {
                 self.isLoading = false
 
                 if let _ = error {
+                    AdEventLogger.log(.rewardedInterstitial, event: "load:failure")
                     self.rewardedInterstitialAd = nil
                     self.isAdReady = false
                     completion?(false)
@@ -48,6 +51,7 @@ final class RewardedInterstitialAdManager: NSObject, ObservableObject {
                 self.rewardedInterstitialAd = ad
                 self.rewardedInterstitialAd?.fullScreenContentDelegate = self
                 self.isAdReady = true
+                AdEventLogger.log(.rewardedInterstitial, event: "load:success")
                 completion?(true)
             }
         }
@@ -64,17 +68,21 @@ final class RewardedInterstitialAdManager: NSObject, ObservableObject {
                             onFailure: (() -> Void)? = nil,
                             onDismiss: (() -> Void)? = nil) {
         if let rewardedInterstitialAd = rewardedInterstitialAd {
+            AdEventLogger.log(.rewardedInterstitial, event: "present:ready")
             onDismissHandler = onDismiss
             onFailureHandler = onFailure
             rewardedInterstitialAd.present(from: viewController) {
+                AdEventLogger.log(.rewardedInterstitial, event: "reward:earned")
                 onReward()
             }
             return
         }
 
+        AdEventLogger.log(.rewardedInterstitial, event: "present:loadAndShow")
         load { [weak self] success in
             guard let self = self else { return }
             guard success, let rewardedInterstitialAd = self.rewardedInterstitialAd else {
+                AdEventLogger.log(.rewardedInterstitial, event: "present:loadFailure")
                 onFailure?()
                 return
             }
@@ -82,6 +90,7 @@ final class RewardedInterstitialAdManager: NSObject, ObservableObject {
             self.onDismissHandler = onDismiss
             self.onFailureHandler = onFailure
             rewardedInterstitialAd.present(from: viewController) {
+                AdEventLogger.log(.rewardedInterstitial, event: "reward:earned")
                 onReward()
             }
         }
@@ -91,6 +100,7 @@ final class RewardedInterstitialAdManager: NSObject, ObservableObject {
 extension RewardedInterstitialAdManager: FullScreenContentDelegate {
     func adDidDismissFullScreenContent(_ ad: FullScreenPresentingAd) {
         DispatchQueue.main.async {
+            AdEventLogger.log(.rewardedInterstitial, event: "dismiss")
             self.rewardedInterstitialAd = nil
             self.isAdReady = false
             let dismissHandler = self.onDismissHandler
@@ -103,6 +113,7 @@ extension RewardedInterstitialAdManager: FullScreenContentDelegate {
 
     func ad(_ ad: FullScreenPresentingAd, didFailToPresentFullScreenContentWithError error: Error) {
         DispatchQueue.main.async {
+            AdEventLogger.log(.rewardedInterstitial, event: "present:failure", detail: error.localizedDescription)
             self.rewardedInterstitialAd = nil
             self.isAdReady = false
             let failureHandler = self.onFailureHandler

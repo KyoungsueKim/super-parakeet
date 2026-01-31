@@ -12,39 +12,52 @@ import UIKit
 final class RewardedAdFlowCoordinator: ObservableObject {
     private let rewardedAdManager: RewardedAdManager
     private let rewardedInterstitialAdManager: RewardedInterstitialAdManager
+    private let interstitialAdManager: InterstitialAdManager
 
     /// 기본 AdMob 매니저를 주입받아 광고 플로우를 구성합니다.
     /// - Parameters:
     ///   - rewardedAdManager: 보상형 광고 매니저.
     ///   - rewardedInterstitialAdManager: 보상형 전면 광고 매니저.
+    ///   - interstitialAdManager: 전면 광고 매니저.
     init(rewardedAdManager: RewardedAdManager = RewardedAdManager(),
-         rewardedInterstitialAdManager: RewardedInterstitialAdManager = RewardedInterstitialAdManager()) {
+         rewardedInterstitialAdManager: RewardedInterstitialAdManager = RewardedInterstitialAdManager(),
+         interstitialAdManager: InterstitialAdManager = InterstitialAdManager()) {
         self.rewardedAdManager = rewardedAdManager
         self.rewardedInterstitialAdManager = rewardedInterstitialAdManager
+        self.interstitialAdManager = interstitialAdManager
     }
 
     /// 광고를 미리 로드합니다.
     func preloadAds() {
+        AdEventLogger.log(.flow, event: "preload:start")
         rewardedAdManager.loadIfNeeded()
         rewardedInterstitialAdManager.loadIfNeeded()
+        interstitialAdManager.loadIfNeeded()
     }
 
-    /// 보상형 광고 이후 보상형 전면 광고를 연속으로 표시합니다.
+    /// 보상형 광고 이후 보상형 전면 광고, 전면 광고를 연속으로 표시합니다.
     /// - Parameters:
     ///   - viewController: 광고를 표시할 루트 컨트롤러.
     ///   - onRewardedAdReward: 보상형 광고 보상 지급 시 호출되는 콜백.
     ///   - onRewardedAdFailure: 보상형 광고 로드/표시 실패 시 호출되는 콜백.
     ///   - onRewardedInterstitialReward: 보상형 전면 광고 보상 지급 시 호출되는 콜백.
+    ///   - onInterstitialShown: 전면 광고 표시 및 종료 시 호출되는 콜백.
     ///   - onFlowFinished: 광고 플로우 종료 시 호출되는 콜백.
     func presentRewardedFlow(from viewController: UIViewController,
                              onRewardedAdReward: @escaping () -> Void,
                              onRewardedAdFailure: @escaping () -> Void,
                              onRewardedInterstitialReward: (() -> Void)? = nil,
+                             onInterstitialShown: (() -> Void)? = nil,
                              onFlowFinished: @escaping () -> Void) {
+        AdEventLogger.log(.flow, event: "start")
         rewardedAdManager.presentIfAvailable(from: viewController,
                                              onReward: onRewardedAdReward,
-                                             onFailure: onRewardedAdFailure,
+                                             onFailure: {
+            AdEventLogger.log(.flow, event: "rewarded:failure")
+            onRewardedAdFailure()
+        },
                                              onDismiss: { [weak self] in
+            AdEventLogger.log(.flow, event: "rewarded:dismiss")
             guard let self = self else {
                 DispatchQueue.main.async {
                     onFlowFinished()
@@ -54,15 +67,36 @@ final class RewardedAdFlowCoordinator: ObservableObject {
 
             self.rewardedInterstitialAdManager.presentIfAvailable(from: viewController,
                                                                   onReward: {
+                AdEventLogger.log(.flow, event: "rewardedInterstitial:reward")
                 onRewardedInterstitialReward?()
             }, onFailure: {
+                AdEventLogger.log(.flow, event: "rewardedInterstitial:failure")
                 DispatchQueue.main.async {
                     onFlowFinished()
                 }
-            }, onDismiss: {
-                DispatchQueue.main.async {
-                    onFlowFinished()
+            }, onDismiss: { [weak self] in
+                AdEventLogger.log(.flow, event: "rewardedInterstitial:dismiss")
+                guard let self = self else {
+                    DispatchQueue.main.async {
+                        onFlowFinished()
+                    }
+                    return
                 }
+
+                self.interstitialAdManager.presentIfAvailable(from: viewController,
+                                                              onFailure: {
+                    AdEventLogger.log(.flow, event: "interstitial:failure")
+                    DispatchQueue.main.async {
+                        onFlowFinished()
+                    }
+                }, onDismiss: {
+                    AdEventLogger.log(.flow, event: "interstitial:dismiss")
+                    onInterstitialShown?()
+                    DispatchQueue.main.async {
+                        AdEventLogger.log(.flow, event: "finish")
+                        onFlowFinished()
+                    }
+                })
             })
         })
     }
