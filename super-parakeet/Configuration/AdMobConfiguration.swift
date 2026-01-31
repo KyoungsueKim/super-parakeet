@@ -14,4 +14,7 @@ enum AdMobConfiguration {
 
     /// 보상형 광고 유닛 ID.
     static let rewardedAdUnitID = "ca-app-pub-8286712861565957/5537056536"
+
+    /// 보상형 전면 광고 유닛 ID.
+    static let rewardedInterstitialAdUnitID = "ca-app-pub-8286712861565957/3302609586"
 }

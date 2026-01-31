@@ -15,9 +15,10 @@ struct MainView: View {
     @State private var showRewardedPrompt: Bool = false
     @State private var showRewardResultAlert: Bool = false
     @State private var rewardResultMessage: String = ""
+    @State private var earnedRewardMessages: [String] = []
     
     @ObservedObject var printJobs = PrintJobs.instance
-    @StateObject private var rewardedAdManager = RewardedAdManager()
+    @StateObject private var rewardedAdFlowCoordinator = RewardedAdFlowCoordinator()
 
     var body: some View {
         VStack(spacing: 20) {
@@ -80,7 +81,7 @@ struct MainView: View {
         .offset(y: isLogin ? 0 : -100)
         .animation(.easeInOut)
         .onAppear {
-            rewardedAdManager.loadIfNeeded()
+            rewardedAdFlowCoordinator.preloadAds()
         }
         .confirmationDialog("보상형 광고",
                             isPresented: $showRewardedPrompt,
@@ -111,11 +112,19 @@ struct MainView: View {
             return
         }
 
-        rewardedAdManager.presentIfAvailable(from: rootViewController, onReward: {
-            rewardResultMessage = "보상이 지급되었습니다."
-            showRewardResultAlert = true
-        }, onFailure: {
+        earnedRewardMessages.removeAll()
+
+        rewardedAdFlowCoordinator.presentRewardedFlow(from: rootViewController,
+                                                      onRewardedAdReward: {
+            earnedRewardMessages.append("보상형 광고 보상이 지급되었습니다.")
+        }, onRewardedAdFailure: {
             rewardResultMessage = "현재 광고를 불러올 수 없습니다. 잠시 후 다시 시도해주세요."
+            showRewardResultAlert = true
+        }, onRewardedInterstitialReward: {
+            earnedRewardMessages.append("보상형 전면 광고 보상이 지급되었습니다.")
+        }, onFlowFinished: {
+            guard earnedRewardMessages.isEmpty == false else { return }
+            rewardResultMessage = earnedRewardMessages.joined(separator: "\n")
             showRewardResultAlert = true
         })
     }
