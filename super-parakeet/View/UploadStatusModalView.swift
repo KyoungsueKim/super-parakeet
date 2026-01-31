@@ -78,10 +78,49 @@ struct UploadProgressView: View {
                                              cornerRadious: 10))
             }
         }.onAppear() {
-            let jobs = PrintJobs.instance.GetJobs()
-            totalCount = jobs.reduce(0) { $0 + PrintJobs.instance.GetJobQuantity(url: $1) }
-            completedJobs = Dictionary(uniqueKeysWithValues: jobs.map { ($0, 0) })
-            SendJobsToServer(jobs: jobs, phoneNumber: phoneNumber, onSuccessCount: $onSuccessCount, errorMessage: $errorMessage, modalViewState: $modalViewState, completedJobs: $completedJobs)
+            let jobURLs = PrintJobs.instance.GetJobs()
+            var uploadJobs: [UploadJob] = []
+
+            for urlString in jobURLs {
+                guard let fileURL = URL(string: urlString) else {
+                    errorMessage = UploadError.invalidFileURL(urlString).localizedDescription
+                    modalViewState = .FAILED
+                    return
+                }
+
+                let quantity = max(PrintJobs.instance.GetJobQuantity(url: urlString), 1)
+                let isA3 = PrintJobs.instance.GetJobIsA3(url: urlString)
+
+                for _ in 0..<quantity {
+                    uploadJobs.append(UploadJob(id: urlString, fileURL: fileURL, isA3: isA3))
+                }
+            }
+
+            if uploadJobs.isEmpty {
+                errorMessage = "업로드할 문서가 없습니다."
+                modalViewState = .FAILED
+                return
+            }
+
+            totalCount = uploadJobs.count
+            completedJobs = Dictionary(uniqueKeysWithValues: jobURLs.map { ($0, 0) })
+
+            let useCase = UploadJobsUseCase()
+            useCase.start(jobs: uploadJobs, phoneNumber: phoneNumber, onProgress: { progress in
+                onSuccessCount = progress.successCount
+                totalCount = progress.totalCount
+                completedJobs = progress.completedJobs
+            }, onCompletion: { result in
+                switch result {
+                case .success:
+                    modalViewState = .SUCCESS
+                    PrintJobs.instance.DeleteAllJobs()
+                    PrintJobs.instance.objectWillChange.send()
+                case .failure(let error):
+                    errorMessage = error.localizedDescription
+                    modalViewState = .FAILED
+                }
+            })
         }
     }
 }
