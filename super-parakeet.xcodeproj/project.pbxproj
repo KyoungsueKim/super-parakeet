@@ -40,7 +40,6 @@
 		D1DC263728A4F5A500D141AD /* CustomModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1DC263528A4F5A500D141AD /* CustomModifier.swift */; };
 		D1DC263828A4F5A500D141AD /* CustomTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1DC263628A4F5A500D141AD /* CustomTextField.swift */; };
 		D1DC263B28AA27AD00D141AD /* Requests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1DC263A28AA27AD00D141AD /* Requests.swift */; };
-		F84D08382DAC873F00F6F204 /* GoogleMobileAds.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = F84D08372DAC873F00F6F204 /* GoogleMobileAds.xcframework */; };
 		F84D08392DAC874600F6F204 /* Pods_super_parakeet.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EECBBA9323E53E4B25EC09E1 /* Pods_super_parakeet.framework */; };
 /* End PBXBuildFile section */
 
@@ -103,7 +102,6 @@
 		D1DC263A28AA27AD00D141AD /* Requests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Requests.swift; sourceTree = "<group>"; };
 		D983483D8141495AB24BA6ED /* UIApplication+TopViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIApplication+TopViewController.swift"; sourceTree = "<group>"; };
 		EECBBA9323E53E4B25EC09E1 /* Pods_super_parakeet.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_super_parakeet.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		F84D08372DAC873F00F6F204 /* GoogleMobileAds.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = GoogleMobileAds.xcframework; path = "Pods/Google-Mobile-Ads-SDK/Frameworks/GoogleMobileAdsFramework-Current/GoogleMobileAds.xcframework"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -119,7 +117,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				F84D08392DAC874600F6F204 /* Pods_super_parakeet.framework in Frameworks */,
-				F84D08382DAC873F00F6F204 /* GoogleMobileAds.xcframework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -138,7 +135,6 @@
 		5CEE779DA7B0EF7244E16ECA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				F84D08372DAC873F00F6F204 /* GoogleMobileAds.xcframework */,
 				EECBBA9323E53E4B25EC09E1 /* Pods_super_parakeet.framework */,
 			);
 			name = Frameworks;

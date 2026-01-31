@@ -11,7 +11,7 @@ import GoogleMobileAds
 
 /// AdMob 배너 광고 전용 컨트롤러.
 final class BannerAdViewController: UIViewController {
-    var banner: GADBannerView? = nil
+    var banner: BannerView? = nil
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
@@ -29,9 +29,9 @@ final class BannerAdViewController: UIViewController {
     func loadBanner() {
         let bannerWidth = self.view.frame.size.width
         
-        let bannerSize = GADPortraitAnchoredAdaptiveBannerAdSizeWithWidth(bannerWidth)
+        let bannerSize = portraitAnchoredAdaptiveBanner(width: bannerWidth)
         
-        banner = GADBannerView(adSize: bannerSize)
+        banner = BannerView(adSize: bannerSize)
         
         guard let banner = self.banner else { return }
         
@@ -41,7 +41,7 @@ final class BannerAdViewController: UIViewController {
         
         banner.adUnitID = AdMobConfiguration.bannerAdUnitID
         
-        let request = GADRequest()
+        let request = Request()
         request.scene = self.view.window?.windowScene
         banner.load(request)
         

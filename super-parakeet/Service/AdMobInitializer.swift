@@ -13,7 +13,7 @@ import GoogleMobileAds
 enum AdMobInitializer {
     /// AdMob SDK를 시작하고 필요 시 추적 권한을 요청합니다.
     static func start() {
-        GADMobileAds.sharedInstance().start { status in
+        MobileAds.shared.start { status in
             AdMobAdapterStatusLogger.log(status: status)
         }
         requestTrackingAuthorizationIfNeeded()
@@ -33,7 +33,7 @@ enum AdMobInitializer {
 private enum AdMobAdapterStatusLogger {
     /// 어댑터 상태의 description을 출력합니다.
     /// - Parameter status: AdMob 초기화 상태.
-    static func log(status: GADInitializationStatus) {
+    static func log(status: InitializationStatus) {
         let adapterStatuses = status.adapterStatusesByClassName
         if adapterStatuses.isEmpty {
             print("[AdMob] No adapter status available.")

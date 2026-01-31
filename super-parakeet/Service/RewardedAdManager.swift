@@ -14,7 +14,7 @@ final class RewardedAdManager: NSObject, ObservableObject {
     /// 현재 광고가 표시 가능한 상태인지 여부.
     @Published private(set) var isAdReady: Bool = false
 
-    private var rewardedAd: GADRewardedAd?
+    private var rewardedAd: RewardedAd?
     private var isLoading: Bool = false
 
     /// 보상형 광고를 미리 로드합니다.
@@ -27,10 +27,10 @@ final class RewardedAdManager: NSObject, ObservableObject {
     /// - Parameter completion: 로드 성공 여부 콜백.
     func load(completion: ((Bool) -> Void)?) {
         isLoading = true
-        let request = GADRequest()
+        let request = Request()
 
-        GADRewardedAd.load(withAdUnitID: AdMobConfiguration.rewardedAdUnitID,
-                           request: request) { [weak self] ad, error in
+        RewardedAd.load(with: AdMobConfiguration.rewardedAdUnitID,
+                        request: request) { [weak self] ad, error in
             guard let self = self else { return }
 
             DispatchQueue.main.async {
@@ -60,7 +60,7 @@ final class RewardedAdManager: NSObject, ObservableObject {
                             onReward: @escaping () -> Void,
                             onFailure: (() -> Void)? = nil) {
         if let rewardedAd = rewardedAd {
-            rewardedAd.present(fromRootViewController: viewController) {
+            rewardedAd.present(from: viewController) {
                 onReward()
             }
             return
@@ -73,15 +73,15 @@ final class RewardedAdManager: NSObject, ObservableObject {
                 return
             }
 
-            rewardedAd.present(fromRootViewController: viewController) {
+            rewardedAd.present(from: viewController) {
                 onReward()
             }
         }
     }
 }
 
-extension RewardedAdManager: GADFullScreenContentDelegate {
-    func adDidDismissFullScreenContent(_ ad: GADFullScreenPresentingAd) {
+extension RewardedAdManager: FullScreenContentDelegate {
+    func adDidDismissFullScreenContent(_ ad: FullScreenPresentingAd) {
         DispatchQueue.main.async {
             self.rewardedAd = nil
             self.isAdReady = false
@@ -89,7 +89,7 @@ extension RewardedAdManager: GADFullScreenContentDelegate {
         }
     }
 
-    func ad(_ ad: GADFullScreenPresentingAd, didFailToPresentFullScreenContentWithError error: Error) {
+    func ad(_ ad: FullScreenPresentingAd, didFailToPresentFullScreenContentWithError error: Error) {
         DispatchQueue.main.async {
             self.rewardedAd = nil
             self.isAdReady = false
