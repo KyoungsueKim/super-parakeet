@@ -40,8 +40,8 @@ final class InterstitialAdManager: NSObject, ObservableObject {
             DispatchQueue.main.async {
                 self.isLoading = false
 
-                if let _ = error {
-                    AdEventLogger.log(.interstitial, event: "load:failure")
+                if let error = error {
+                    AdEventLogger.logError(.interstitial, event: "load:failure", error: error)
                     self.interstitialAd = nil
                     self.isAdReady = false
                     completion?(false)
@@ -105,7 +105,7 @@ extension InterstitialAdManager: FullScreenContentDelegate {
 
     func ad(_ ad: FullScreenPresentingAd, didFailToPresentFullScreenContentWithError error: Error) {
         DispatchQueue.main.async {
-            AdEventLogger.log(.interstitial, event: "present:failure", detail: error.localizedDescription)
+            AdEventLogger.logError(.interstitial, event: "present:failure", error: error)
             self.interstitialAd = nil
             self.isAdReady = false
             let failureHandler = self.onFailureHandler

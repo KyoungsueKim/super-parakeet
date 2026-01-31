@@ -10,6 +10,7 @@ import SwiftUI
 @main
 struct super_parakeetApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    @Environment(\.scenePhase) private var scenePhase
 
     init() {
         AdMobInitializer.start()
@@ -18,6 +19,18 @@ struct super_parakeetApp: App {
     var body: some Scene {
         WindowGroup {
             MainView()
+                .onChange(of: scenePhase) { newPhase in
+                    switch newPhase {
+                    case .active:
+                        AppOpenAdManager.shared.updateAppActive(true)
+                        let rootViewController = UIApplication.shared.topViewController()
+                        AppOpenAdManager.shared.showAdIfAvailable(from: rootViewController)
+                    case .inactive, .background:
+                        AppOpenAdManager.shared.updateAppActive(false)
+                    @unknown default:
+                        break
+                    }
+                }
         }
     }
 }

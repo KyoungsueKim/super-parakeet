@@ -40,8 +40,8 @@ final class RewardedAdManager: NSObject, ObservableObject {
             DispatchQueue.main.async {
                 self.isLoading = false
 
-                if let _ = error {
-                    AdEventLogger.log(.rewarded, event: "load:failure")
+                if let error = error {
+                    AdEventLogger.logError(.rewarded, event: "load:failure", error: error)
                     self.rewardedAd = nil
                     self.isAdReady = false
                     completion?(false)
@@ -113,7 +113,7 @@ extension RewardedAdManager: FullScreenContentDelegate {
 
     func ad(_ ad: FullScreenPresentingAd, didFailToPresentFullScreenContentWithError error: Error) {
         DispatchQueue.main.async {
-            AdEventLogger.log(.rewarded, event: "present:failure", detail: error.localizedDescription)
+            AdEventLogger.logError(.rewarded, event: "present:failure", error: error)
             self.rewardedAd = nil
             self.isAdReady = false
             let failureHandler = self.onFailureHandler

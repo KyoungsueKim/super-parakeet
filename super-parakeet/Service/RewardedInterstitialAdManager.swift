@@ -40,8 +40,8 @@ final class RewardedInterstitialAdManager: NSObject, ObservableObject {
             DispatchQueue.main.async {
                 self.isLoading = false
 
-                if let _ = error {
-                    AdEventLogger.log(.rewardedInterstitial, event: "load:failure")
+                if let error = error {
+                    AdEventLogger.logError(.rewardedInterstitial, event: "load:failure", error: error)
                     self.rewardedInterstitialAd = nil
                     self.isAdReady = false
                     completion?(false)
@@ -113,7 +113,7 @@ extension RewardedInterstitialAdManager: FullScreenContentDelegate {
 
     func ad(_ ad: FullScreenPresentingAd, didFailToPresentFullScreenContentWithError error: Error) {
         DispatchQueue.main.async {
-            AdEventLogger.log(.rewardedInterstitial, event: "present:failure", detail: error.localizedDescription)
+            AdEventLogger.logError(.rewardedInterstitial, event: "present:failure", error: error)
             self.rewardedInterstitialAd = nil
             self.isAdReady = false
             let failureHandler = self.onFailureHandler

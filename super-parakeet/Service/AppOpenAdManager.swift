@@ -50,7 +50,7 @@ final class AppOpenAdManager: NSObject, ObservableObject {
             return
         }
 
-        lastRootViewController = viewController
+        lastRootViewController = viewController ?? UIApplication.shared.topViewController()
         shouldShowWhenLoaded = true
 
         if isShowing {
@@ -58,8 +58,8 @@ final class AppOpenAdManager: NSObject, ObservableObject {
             return
         }
 
-        if let viewController = viewController, isAdAvailable() {
-            presentAd(from: viewController)
+        if isAdAvailable() {
+            presentAd(from: resolveRootViewController())
             return
         }
 
@@ -101,7 +101,7 @@ final class AppOpenAdManager: NSObject, ObservableObject {
             DispatchQueue.main.async {
                 self.isLoading = false
                 if let error = error {
-                    AdEventLogger.log(.appOpen, event: "load:failure", detail: error.localizedDescription)
+                    AdEventLogger.logError(.appOpen, event: "load:failure", error: error)
                     self.appOpenAd = nil
                     self.loadTime = nil
                     return
@@ -113,20 +113,37 @@ final class AppOpenAdManager: NSObject, ObservableObject {
                 AdEventLogger.log(.appOpen, event: "load:success")
 
                 if self.shouldShowWhenLoaded, self.isAppActive {
-                    if let viewController = self.lastRootViewController ?? UIApplication.shared.topViewController() {
-                        self.presentAd(from: viewController)
-                    }
+                    self.presentAd(from: self.resolveRootViewController())
                 }
             }
         }
     }
 
-    private func presentAd(from viewController: UIViewController) {
+    private func presentAd(from viewController: UIViewController?) {
         guard let appOpenAd = appOpenAd else { return }
+        if viewController == nil {
+            AdEventLogger.log(.appOpen, event: "present:missingRootViewController")
+        }
+
         AdEventLogger.log(.appOpen, event: "present:start")
         isShowing = true
         shouldShowWhenLoaded = false
         appOpenAd.present(from: viewController)
+    }
+
+    private func resolveRootViewController() -> UIViewController? {
+        if let viewController = lastRootViewController {
+            return viewController
+        }
+        return UIApplication.shared.topViewController() ?? UIApplication.shared.activeKeyWindow?.rootViewController
+    }
+
+    private func retryPresentIfPossible() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+            guard let self = self else { return }
+            guard self.shouldShowWhenLoaded, self.isAppActive, self.isAdAvailable() else { return }
+            self.presentAd(from: self.resolveRootViewController())
+        }
     }
 
     private func resetAdState() {
@@ -150,6 +167,18 @@ final class AppOpenAdManager: NSObject, ObservableObject {
 }
 
 extension AppOpenAdManager: FullScreenContentDelegate {
+    func adWillPresentFullScreenContent(_ ad: FullScreenPresentingAd) {
+        DispatchQueue.main.async {
+            AdEventLogger.log(.appOpen, event: "present:will")
+        }
+    }
+
+    func adDidRecordImpression(_ ad: FullScreenPresentingAd) {
+        DispatchQueue.main.async {
+            AdEventLogger.log(.appOpen, event: "impression")
+        }
+    }
+
     func adDidDismissFullScreenContent(_ ad: FullScreenPresentingAd) {
         DispatchQueue.main.async {
             AdEventLogger.log(.appOpen, event: "dismiss")
@@ -162,7 +191,7 @@ extension AppOpenAdManager: FullScreenContentDelegate {
 
     func ad(_ ad: FullScreenPresentingAd, didFailToPresentFullScreenContentWithError error: Error) {
         DispatchQueue.main.async {
-            AdEventLogger.log(.appOpen, event: "present:failure", detail: error.localizedDescription)
+            AdEventLogger.logError(.appOpen, event: "present:failure", error: error)
             self.appOpenAd = nil
             self.loadTime = nil
             self.isShowing = false

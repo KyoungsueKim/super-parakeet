@@ -30,4 +30,15 @@ enum AdEventLogger {
         }
         print("[Ad][\(type.rawValue)] \(event)")
     }
+
+    /// 광고 에러 정보를 상세하게 기록합니다.
+    /// - Parameters:
+    ///   - type: 광고 유형.
+    ///   - event: 발생한 이벤트 명.
+    ///   - error: 발생한 에러.
+    static func logError(_ type: AdType, event: String, error: Error) {
+        let nsError = error as NSError
+        let detail = "\(nsError.domain) (\(nsError.code)) \(nsError.localizedDescription)"
+        log(type, event: event, detail: detail)
+    }
 }

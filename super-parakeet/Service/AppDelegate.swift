@@ -17,16 +17,6 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
         return true
     }
 
-    func applicationDidBecomeActive(_ application: UIApplication) {
-        AppOpenAdManager.shared.updateAppActive(true)
-        let rootViewController = UIApplication.shared.topViewController()
-        AppOpenAdManager.shared.showAdIfAvailable(from: rootViewController)
-    }
-
-    func applicationWillResignActive(_ application: UIApplication) {
-        AppOpenAdManager.shared.updateAppActive(false)
-    }
-
     /// 앱 오프닝 광고의 유효성을 확인합니다.
     /// - Returns: 유효하면 true.
     func isAppOpenAdValid() -> Bool {
