@@ -8,22 +8,13 @@
 import Foundation
 import SwiftUI
 import GoogleMobileAds
-import AppTrackingTransparency
 
-class GoogleAdViewUIController: UIViewController {
+/// AdMob 배너 광고 전용 컨트롤러.
+final class BannerAdViewController: UIViewController {
     var banner: GADBannerView? = nil
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        if banner == nil {
-            GADMobileAds.sharedInstance().start(completionHandler: nil)
-
-            // DispatchQueue 이용
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-              ATTrackingManager.requestTrackingAuthorization(completionHandler: { _ in })
-            }
-        }
-        
         loadBanner()
     }
     
@@ -48,7 +39,7 @@ class GoogleAdViewUIController: UIViewController {
         self.view.addSubview(banner)
         self.view.frame = CGRect(origin: .zero, size: bannerSize.size)
         
-        banner.adUnitID = "ca-app-pub-8286712861565957/5082638113"
+        banner.adUnitID = AdMobConfiguration.bannerAdUnitID
         
         let request = GADRequest()
         request.scene = self.view.window?.windowScene
@@ -57,10 +48,11 @@ class GoogleAdViewUIController: UIViewController {
     }
 }
 
-struct GoogleAdView: UIViewControllerRepresentable {
+/// SwiftUI에서 사용하는 AdMob 배너 광고 뷰.
+struct BannerAdView: UIViewControllerRepresentable {
     
     func makeUIViewController(context: Context) -> UIViewController {
-        let viewController = GoogleAdViewUIController()
+        let viewController = BannerAdViewController()
 
         return viewController
     }

@@ -9,6 +9,10 @@ import SwiftUI
 
 @main
 struct super_parakeetApp: App {
+    init() {
+        AdMobInitializer.start()
+    }
+
     var body: some Scene {
         WindowGroup {
             MainView()

@@ -7,12 +7,17 @@
 
 import SwiftUI
 import Messages
+import UIKit
 
 struct MainView: View {
     @State var phoneNumber: String = ""
     @State var isLogin: Bool = false
+    @State private var showRewardedPrompt: Bool = false
+    @State private var showRewardResultAlert: Bool = false
+    @State private var rewardResultMessage: String = ""
     
     @ObservedObject var printJobs = PrintJobs.instance
+    @StateObject private var rewardedAdManager = RewardedAdManager()
 
     var body: some View {
         VStack(spacing: 20) {
@@ -20,6 +25,9 @@ struct MainView: View {
                 .resizable()
                 .frame(width: 120, height: 120, alignment: .center)
                 .padding(.top, 100)
+                .onTapGesture(count: 3) {
+                    showRewardedPrompt = true
+                }
             
             Text("Ajou University Printing System")
                 .modifier(TextModifier(font: UIConfiguration.titleFont,
@@ -30,7 +38,7 @@ struct MainView: View {
             if (!isLogin) {
                 loginStack(phoneNumber: $phoneNumber, isLogin: $isLogin)
                 
-                GoogleAdView()
+                BannerAdView()
                     .frame(width: UIScreen.main.bounds.width > 400 ? 400 : UIScreen.main.bounds.width, height: 50, alignment: .center)
             }
             // if login
@@ -63,7 +71,7 @@ struct MainView: View {
                     )
                     .padding(.horizontal, 15)
                     
-                    GoogleAdView()
+                    BannerAdView()
                         .frame(width: UIScreen.main.bounds.width > 400 ? 400 : UIScreen.main.bounds.width, height: 50, alignment: .center)
                         .padding(.bottom, 15)
                 }
@@ -71,10 +79,45 @@ struct MainView: View {
         }
         .offset(y: isLogin ? 0 : -100)
         .animation(.easeInOut)
+        .onAppear {
+            rewardedAdManager.loadIfNeeded()
+        }
+        .confirmationDialog("보상형 광고",
+                            isPresented: $showRewardedPrompt,
+                            titleVisibility: .visible) {
+            Button("광고 시청하고 보상받기") {
+                requestRewardedAd()
+            }
+            Button("취소", role: .cancel) { }
+        } message: {
+            Text("원하는 경우에만 광고를 시청할 수 있습니다.")
+        }
+        .alert("보상 안내", isPresented: $showRewardResultAlert) {
+            Button("확인", role: .cancel) { }
+        } message: {
+            Text(rewardResultMessage)
+        }
     }
     
     func removeRows(at offsets: IndexSet) {
         PrintJobs.instance.RemoveJob(index: offsets.first!)
+    }
+
+    /// 보상형 광고를 요청하고 표시합니다.
+    private func requestRewardedAd() {
+        guard let rootViewController = UIApplication.shared.topViewController() else {
+            rewardResultMessage = "광고를 표시할 화면을 찾지 못했습니다."
+            showRewardResultAlert = true
+            return
+        }
+
+        rewardedAdManager.presentIfAvailable(from: rootViewController, onReward: {
+            rewardResultMessage = "보상이 지급되었습니다."
+            showRewardResultAlert = true
+        }, onFailure: {
+            rewardResultMessage = "현재 광고를 불러올 수 없습니다. 잠시 후 다시 시도해주세요."
+            showRewardResultAlert = true
+        })
     }
 }
 
