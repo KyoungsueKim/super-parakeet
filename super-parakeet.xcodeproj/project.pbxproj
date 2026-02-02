@@ -8,8 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		2999E47973DC45F5A7DBBF50 /* AdMobInitializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FBCE023C4E443D896F0F035 /* AdMobInitializer.swift */; };
-		F8C2A1B92F3A9C1000E1F1AA /* AppLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8C2A1B82F3A9C1000E1F1AA /* AppLogger.swift */; };
-		F8B6C1E12F3A4D5100ABCD12 /* UploadStatusViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8B6C1E02F3A4D5100ABCD12 /* UploadStatusViewModel.swift */; };
 		638B976A187445F2A4A1EE2F /* UIApplication+TopViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D983483D8141495AB24BA6ED /* UIApplication+TopViewController.swift */; };
 		8CC806A2A3D44DB491A76369 /* AdMobConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D8BF41E376E4787B0DB32D5 /* AdMobConfiguration.swift */; };
 		A3817E4F2C4C4FB19CFBC7C9 /* RewardedAdManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6329C3171FAE43A8868F61D4 /* RewardedAdManager.swift */; };
@@ -50,6 +48,8 @@
 		F8552A772F2E5B3000E99086 /* AppOpenAdPreference.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8552A762F2E5B3000E99086 /* AppOpenAdPreference.swift */; };
 		F8552A782F2E5B3000E99086 /* AppOpenAdManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8552A752F2E5B3000E99086 /* AppOpenAdManager.swift */; };
 		F8552A792F2E5B3000E99086 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8552A742F2E5B3000E99086 /* AppDelegate.swift */; };
+		F8B6C1E12F3A4D5100ABCD12 /* UploadStatusViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8B6C1E02F3A4D5100ABCD12 /* UploadStatusViewModel.swift */; };
+		F8C2A1B92F3A9C1000E1F1AA /* AppLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8C2A1B82F3A9C1000E1F1AA /* AppLogger.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -118,8 +118,8 @@
 		F8552A742F2E5B3000E99086 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		F8552A752F2E5B3000E99086 /* AppOpenAdManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppOpenAdManager.swift; sourceTree = "<group>"; };
 		F8552A762F2E5B3000E99086 /* AppOpenAdPreference.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppOpenAdPreference.swift; sourceTree = "<group>"; };
-		F8C2A1B82F3A9C1000E1F1AA /* AppLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLogger.swift; sourceTree = "<group>"; };
 		F8B6C1E02F3A4D5100ABCD12 /* UploadStatusViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UploadStatusViewModel.swift; sourceTree = "<group>"; };
+		F8C2A1B82F3A9C1000E1F1AA /* AppLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLogger.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -219,14 +219,6 @@
 			path = "super-parakeet";
 			sourceTree = "<group>";
 		};
-		F8B6C1E22F3A4D5100ABCD12 /* ViewModel */ = {
-			isa = PBXGroup;
-			children = (
-				F8B6C1E02F3A4D5100ABCD12 /* UploadStatusViewModel.swift */,
-			);
-			path = ViewModel;
-			sourceTree = "<group>";
-		};
 		D1DC260528A4F10700D141AD /* Preview Content */ = {
 			isa = PBXGroup;
 			children = (
@@ -282,6 +274,14 @@
 				F8552A762F2E5B3000E99086 /* AppOpenAdPreference.swift */,
 			);
 			path = Service;
+			sourceTree = "<group>";
+		};
+		F8B6C1E22F3A4D5100ABCD12 /* ViewModel */ = {
+			isa = PBXGroup;
+			children = (
+				F8B6C1E02F3A4D5100ABCD12 /* UploadStatusViewModel.swift */,
+			);
+			path = ViewModel;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -396,13 +396,9 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-super-parakeet/Pods-super-parakeet-resources-${CONFIGURATION}-input-files.xcfilelist",
 			);
-			inputPaths = (
-			);
 			name = "[CP] Copy Pods Resources";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-super-parakeet/Pods-super-parakeet-resources-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -439,13 +435,9 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-super-parakeet/Pods-super-parakeet-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
-			inputPaths = (
-			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-super-parakeet/Pods-super-parakeet-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
