@@ -17,22 +17,18 @@ enum ModalViewState {
 
 struct UploadStatusModalView: View {
     var phoneNumber: String
-    
-    @State var errorMessage: String?
-    @State var onSuccessCount: Int = 0
-    @State var totalCount: Int = 0
-    
-    @State var modalViewState: ModalViewState = .PROGRESS
+
+    @StateObject private var viewModel = UploadStatusViewModel()
     
     
     var body: some View {
-        switch modalViewState {
+        switch viewModel.state {
             case .PROGRESS:
-                UploadProgressView(phoneNumber: phoneNumber, onSuccessCount: $onSuccessCount, errorMessage: $errorMessage, modalViewState: $modalViewState)
+                UploadProgressView(phoneNumber: phoneNumber, viewModel: viewModel)
             case .SUCCESS:
                 UploadSuccessView()
             case .FAILED:
-                UploadFailedView(errorMessage: $errorMessage)
+                UploadFailedView(errorMessage: viewModel.errorMessage)
         }
     }
 }
@@ -41,12 +37,7 @@ struct UploadProgressView: View {
     @Environment(\.presentationMode) var presentation: Binding<PresentationMode>
     
     var phoneNumber: String
-    @Binding var onSuccessCount: Int
-    @Binding var errorMessage: String?
-    @Binding var modalViewState: ModalViewState
-    
-    @State var totalCount: Int = 0
-    @State var completedJobs: [String: Int] = [:]
+    @ObservedObject var viewModel: UploadStatusViewModel
     
     var body: some View{
         VStack (spacing: 15){
@@ -57,7 +48,7 @@ struct UploadProgressView: View {
                     HapticManager.instance.notification(type: .warning)
                 }
 
-            Text("Upload pdf to the server... (\(onSuccessCount)/\(totalCount))")
+            Text("Upload pdf to the server... (\(viewModel.onSuccessCount)/\(viewModel.totalCount))")
                 .modifier(TextModifier(font: UIConfiguration.titleFont,
                                    color: UIConfiguration.ajouColor))
                 .padding(.horizontal, 60)
@@ -67,6 +58,7 @@ struct UploadProgressView: View {
                 .padding(.horizontal, 60)
             
             Button(action: {
+                viewModel.cancel()
                 presentation.wrappedValue.dismiss()
             }) {
                 Text("Cancel")
@@ -77,34 +69,9 @@ struct UploadProgressView: View {
                                              height: 35,
                                              cornerRadious: 10))
             }
-        }.onAppear() {
-            let descriptors = PrintJobQueue.shared.jobDescriptors()
-            let planner = UploadJobPlanner()
-
-            switch planner.makePlan(from: descriptors) {
-            case .failure(let error):
-                errorMessage = error.localizedDescription
-                modalViewState = .FAILED
-            case .success(let plan):
-                totalCount = plan.totalCount
-                completedJobs = plan.completedJobs
-
-                let useCase = UploadJobsUseCase()
-                useCase.start(jobs: plan.jobs, phoneNumber: phoneNumber, onProgress: { progress in
-                onSuccessCount = progress.successCount
-                totalCount = progress.totalCount
-                completedJobs = progress.completedJobs
-                }, onCompletion: { result in
-                    switch result {
-                    case .success:
-                        modalViewState = .SUCCESS
-                        PrintJobQueue.shared.removeAllJobs()
-                    case .failure(let error):
-                        errorMessage = error.localizedDescription
-                        modalViewState = .FAILED
-                    }
-                })
-            }
+        }
+        .onAppear {
+            viewModel.startIfNeeded(phoneNumber: phoneNumber)
         }
     }
 }
@@ -150,8 +117,7 @@ struct UploadSuccessView: View {
 
 struct UploadFailedView: View {
     @Environment(\.presentationMode) var presentation: Binding<PresentationMode>
-
-    @Binding var errorMessage: String?
+    let errorMessage: String?
     
     var body: some View{
         VStack (spacing: 15){

@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		2999E47973DC45F5A7DBBF50 /* AdMobInitializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FBCE023C4E443D896F0F035 /* AdMobInitializer.swift */; };
+		F8B6C1E12F3A4D5100ABCD12 /* UploadStatusViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8B6C1E02F3A4D5100ABCD12 /* UploadStatusViewModel.swift */; };
 		638B976A187445F2A4A1EE2F /* UIApplication+TopViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D983483D8141495AB24BA6ED /* UIApplication+TopViewController.swift */; };
 		8CC806A2A3D44DB491A76369 /* AdMobConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D8BF41E376E4787B0DB32D5 /* AdMobConfiguration.swift */; };
 		A3817E4F2C4C4FB19CFBC7C9 /* RewardedAdManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6329C3171FAE43A8868F61D4 /* RewardedAdManager.swift */; };
@@ -116,6 +117,7 @@
 		F8552A742F2E5B3000E99086 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		F8552A752F2E5B3000E99086 /* AppOpenAdManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppOpenAdManager.swift; sourceTree = "<group>"; };
 		F8552A762F2E5B3000E99086 /* AppOpenAdPreference.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppOpenAdPreference.swift; sourceTree = "<group>"; };
+		F8B6C1E02F3A4D5100ABCD12 /* UploadStatusViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UploadStatusViewModel.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -201,6 +203,7 @@
 			isa = PBXGroup;
 			children = (
 				D1512A3528B4687E000A8886 /* View */,
+				F8B6C1E22F3A4D5100ABCD12 /* ViewModel */,
 				D1DC263928AA279000D141AD /* Service */,
 				D1DC263428A4F59B00D141AD /* Components */,
 				D1DC262D28A4F3EE00D141AD /* Model */,
@@ -212,6 +215,14 @@
 				D1D2F6482B30713600086BDD /* Info.plist */,
 			);
 			path = "super-parakeet";
+			sourceTree = "<group>";
+		};
+		F8B6C1E22F3A4D5100ABCD12 /* ViewModel */ = {
+			isa = PBXGroup;
+			children = (
+				F8B6C1E02F3A4D5100ABCD12 /* UploadStatusViewModel.swift */,
+			);
+			path = ViewModel;
 			sourceTree = "<group>";
 		};
 		D1DC260528A4F10700D141AD /* Preview Content */ = {
@@ -465,6 +476,7 @@
 				D1DC260228A4F10700D141AD /* MainView.swift in Sources */,
 				D122936428AECFDE00AFB2AE /* Extensions.swift in Sources */,
 				D1512A3728B46897000A8886 /* UploadStatusModalView.swift in Sources */,
+				F8B6C1E12F3A4D5100ABCD12 /* UploadStatusViewModel.swift in Sources */,
 				638B976A187445F2A4A1EE2F /* UIApplication+TopViewController.swift in Sources */,
 				D1DC263728A4F5A500D141AD /* CustomModifier.swift in Sources */,
 				D122936028AEC45800AFB2AE /* HapticManager.swift in Sources */,

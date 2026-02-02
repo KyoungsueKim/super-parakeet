@@ -120,23 +120,21 @@ protocol UploadRequesting {
     /// - Parameters:
     ///   - job: 업로드할 문서 정보.
     ///   - phoneNumber: 사용자 전화번호.
-    ///   - completion: 결과 콜백.
-    func upload(job: UploadJob, phoneNumber: String, completion: @escaping (Result<Void, UploadError>) -> Void)
+    /// - Throws: 업로드 실패 또는 취소 오류.
+    func upload(job: UploadJob, phoneNumber: String) async throws
 }
 
 /// Alamofire 기반 업로드 클라이언트.
 final class AlamofireUploadClient: UploadRequesting {
     private let endpointURL = URL(string: "https://print.kksoft.kr/upload_file/")!
 
-    func upload(job: UploadJob, phoneNumber: String, completion: @escaping (Result<Void, UploadError>) -> Void) {
+    func upload(job: UploadJob, phoneNumber: String) async throws {
         guard job.fileURL.isFileURL else {
-            completion(.failure(.invalidFileURL(job.fileURL.absoluteString)))
-            return
+            throw UploadError.invalidFileURL(job.fileURL.absoluteString)
         }
 
         guard FileManager.default.fileExists(atPath: job.fileURL.path) else {
-            completion(.failure(.fileNotFound(job.fileURL)))
-            return
+            throw UploadError.fileNotFound(job.fileURL)
         }
 
         let parameters: [String: Any] = [
@@ -144,30 +142,32 @@ final class AlamofireUploadClient: UploadRequesting {
             "is_a3": job.isA3
         ]
 
-        AF.upload(multipartFormData: { multipartFormData in
+        let uploadRequest = AF.upload(multipartFormData: { multipartFormData in
             for (key, value) in parameters {
                 multipartFormData.append("\(value)".data(using: .utf8)!, withName: key)
             }
             multipartFormData.append(job.fileURL, withName: "file")
         }, to: endpointURL)
         .validate(statusCode: 200..<300)
-        .responseData { response in
-            if let error = response.error {
-                if let statusCode = response.response?.statusCode {
-                    let message = Self.normalizedServerMessage(from: response.data)
-                    completion(.failure(.httpStatus(code: statusCode, message: message)))
-                    return
-                }
+        let response = await withTaskCancellationHandler {
+            uploadRequest.cancel()
+        } operation: {
+            await uploadRequest.serializingData().response
+        }
 
-                if let afError = error.asAFError {
-                    completion(.failure(.network(afError)))
-                } else {
-                    completion(.failure(.unknown))
-                }
-                return
+        if let error = response.error {
+            if let statusCode = response.response?.statusCode {
+                let message = Self.normalizedServerMessage(from: response.data)
+                throw UploadError.httpStatus(code: statusCode, message: message)
             }
 
-            completion(.success(()))
+            if let afError = error.asAFError {
+                if afError.isExplicitlyCancelledError {
+                    throw CancellationError()
+                }
+                throw UploadError.network(afError)
+            }
+            throw UploadError.unknown
         }
     }
 
@@ -194,10 +194,9 @@ final class AlamofireUploadClient: UploadRequesting {
     }
 }
 
-/// 여러 문서를 순차적으로 업로드하고 진행 상태를 제공하는 유즈케이스.
+/// 여러 문서를 업로드하고 진행 상태를 제공하는 유즈케이스.
 final class UploadJobsUseCase {
     private let uploader: UploadRequesting
-    private let stateQueue = DispatchQueue(label: "UploadJobsUseCase.state")
 
     init(uploader: UploadRequesting = AlamofireUploadClient()) {
         self.uploader = uploader
@@ -207,62 +206,79 @@ final class UploadJobsUseCase {
     /// - Parameters:
     ///   - jobs: 업로드할 문서 목록.
     ///   - phoneNumber: 사용자 전화번호.
-    ///   - onProgress: 진행 상태 콜백(메인 스레드에서 호출).
-    ///   - onCompletion: 전체 성공/실패 콜백(메인 스레드에서 호출).
+    ///   - onProgress: 진행 상태 콜백.
+    /// - Returns: 최종 업로드 진행 상태.
+    /// - Throws: 업로드 실패 또는 취소 오류.
     func start(
         jobs: [UploadJob],
         phoneNumber: String,
-        onProgress: @escaping (UploadProgress) -> Void,
-        onCompletion: @escaping (Result<UploadProgress, UploadError>) -> Void
-    ) {
+        onProgress: @escaping @Sendable (UploadProgress) async -> Void
+    ) async throws -> UploadProgress {
+        guard jobs.isEmpty == false else {
+            throw UploadError.emptyQueue
+        }
+
         let totalCount = jobs.count
-        if totalCount == 0 {
-            let progress = UploadProgress(successCount: 0, totalCount: 0, completedJobs: [:])
-            DispatchQueue.main.async {
-                onCompletion(.success(progress))
-            }
-            return
+        var initialCompletedJobs: [String: Int] = [:]
+        for job in jobs {
+            initialCompletedJobs[job.id, default: 0] = 0
         }
 
-        var successCount = 0
-        var completedJobs: [String: Int] = [:]
-        for job in jobs {
-            completedJobs[job.id] = 0
-        }
+        let accumulator = UploadProgressAccumulator(
+            totalCount: totalCount,
+            completedJobs: initialCompletedJobs
+        )
 
-        var hasFinished = false
+        var lastProgress: UploadProgress?
 
-        for job in jobs {
-            uploader.upload(job: job, phoneNumber: phoneNumber) { [stateQueue] result in
-                stateQueue.async {
-                    guard !hasFinished else { return }
-
-                    switch result {
-                    case .success:
-                        successCount += 1
-                        completedJobs[job.id, default: 0] += 1
-                        let progress = UploadProgress(
-                            successCount: successCount,
-                            totalCount: totalCount,
-                            completedJobs: completedJobs
-                        )
-                        DispatchQueue.main.async {
-                            onProgress(progress)
-                        }
-                        if successCount == totalCount {
-                            hasFinished = true
-                            DispatchQueue.main.async {
-                                onCompletion(.success(progress))
-                            }
-                        }
-                    case .failure(let error):
-                        hasFinished = true
-                        DispatchQueue.main.async {
-                            onCompletion(.failure(error))
-                        }
+        do {
+            try await withThrowingTaskGroup(of: String.self) { group in
+                for job in jobs {
+                    group.addTask {
+                        try Task.checkCancellation()
+                        try await self.uploader.upload(job: job, phoneNumber: phoneNumber)
+                        return job.id
                     }
                 }
+
+                for try await jobId in group {
+                    let progress = await accumulator.recordSuccess(for: jobId)
+                    lastProgress = progress
+                    await onProgress(progress)
+                }
             }
+        } catch {
+            throw error
         }
+
+        return lastProgress ?? UploadProgress(
+            successCount: 0,
+            totalCount: totalCount,
+            completedJobs: initialCompletedJobs
+        )
+    }
+}
+
+/// 업로드 진행 상태를 안전하게 합산하는 액터입니다.
+actor UploadProgressAccumulator {
+    private let totalCount: Int
+    private var successCount: Int = 0
+    private var completedJobs: [String: Int]
+
+    init(totalCount: Int, completedJobs: [String: Int]) {
+        self.totalCount = totalCount
+        self.completedJobs = completedJobs
+    }
+
+    /// 성공한 작업을 반영하고 새로운 진행 상태를 반환합니다.
+    /// - Parameter jobId: 완료된 작업의 식별자.
+    func recordSuccess(for jobId: String) -> UploadProgress {
+        successCount += 1
+        completedJobs[jobId, default: 0] += 1
+        return UploadProgress(
+            successCount: successCount,
+            totalCount: totalCount,
+            completedJobs: completedJobs
+        )
     }
 }
