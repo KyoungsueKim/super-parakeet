@@ -121,8 +121,10 @@ final class AppOpenAdManager: NSObject, ObservableObject {
 
     private func presentAd(from viewController: UIViewController?) {
         guard let appOpenAd = appOpenAd else { return }
-        if viewController == nil {
+        guard let viewController = viewController else {
             AdEventLogger.log(.appOpen, event: "present:missingRootViewController")
+            retryPresentIfPossible()
+            return
         }
 
         AdEventLogger.log(.appOpen, event: "present:start")

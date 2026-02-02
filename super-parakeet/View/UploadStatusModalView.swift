@@ -78,49 +78,33 @@ struct UploadProgressView: View {
                                              cornerRadious: 10))
             }
         }.onAppear() {
-            let jobURLs = PrintJobs.instance.GetJobs()
-            var uploadJobs: [UploadJob] = []
+            let descriptors = PrintJobQueue.shared.jobDescriptors()
+            let planner = UploadJobPlanner()
 
-            for urlString in jobURLs {
-                guard let fileURL = URL(string: urlString) else {
-                    errorMessage = UploadError.invalidFileURL(urlString).localizedDescription
-                    modalViewState = .FAILED
-                    return
-                }
-
-                let quantity = max(PrintJobs.instance.GetJobQuantity(url: urlString), 1)
-                let isA3 = PrintJobs.instance.GetJobIsA3(url: urlString)
-
-                for _ in 0..<quantity {
-                    uploadJobs.append(UploadJob(id: urlString, fileURL: fileURL, isA3: isA3))
-                }
-            }
-
-            if uploadJobs.isEmpty {
-                errorMessage = "업로드할 문서가 없습니다."
+            switch planner.makePlan(from: descriptors) {
+            case .failure(let error):
+                errorMessage = error.localizedDescription
                 modalViewState = .FAILED
-                return
-            }
+            case .success(let plan):
+                totalCount = plan.totalCount
+                completedJobs = plan.completedJobs
 
-            totalCount = uploadJobs.count
-            completedJobs = Dictionary(uniqueKeysWithValues: jobURLs.map { ($0, 0) })
-
-            let useCase = UploadJobsUseCase()
-            useCase.start(jobs: uploadJobs, phoneNumber: phoneNumber, onProgress: { progress in
+                let useCase = UploadJobsUseCase()
+                useCase.start(jobs: plan.jobs, phoneNumber: phoneNumber, onProgress: { progress in
                 onSuccessCount = progress.successCount
                 totalCount = progress.totalCount
                 completedJobs = progress.completedJobs
-            }, onCompletion: { result in
-                switch result {
-                case .success:
-                    modalViewState = .SUCCESS
-                    PrintJobs.instance.DeleteAllJobs()
-                    PrintJobs.instance.objectWillChange.send()
-                case .failure(let error):
-                    errorMessage = error.localizedDescription
-                    modalViewState = .FAILED
-                }
-            })
+                }, onCompletion: { result in
+                    switch result {
+                    case .success:
+                        modalViewState = .SUCCESS
+                        PrintJobQueue.shared.removeAllJobs()
+                    case .failure(let error):
+                        errorMessage = error.localizedDescription
+                        modalViewState = .FAILED
+                    }
+                })
+            }
         }
     }
 }

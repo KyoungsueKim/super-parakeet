@@ -22,7 +22,7 @@ struct MainView: View {
     @State private var showAppOpenPrompt: Bool = false
     @State private var isAppOpenAdEnabled: Bool = AppOpenAdPreference.isEnabled
     
-    @ObservedObject var printJobs = PrintJobs.instance
+    @ObservedObject var printJobQueue = PrintJobQueue.shared
     @StateObject private var rewardedAdFlowCoordinator = RewardedAdFlowCoordinator()
 
     var body: some View {
@@ -47,7 +47,7 @@ struct MainView: View {
                 
                 // if not login
                 if (!isLogin) {
-                    loginStack(phoneNumber: $phoneNumber, isLogin: $isLogin)
+                    LoginStack(phoneNumber: $phoneNumber, isLogin: $isLogin)
                     
                     BannerAdView()
                         .frame(width: UIScreen.main.bounds.width > 400 ? 400 : UIScreen.main.bounds.width, height: 50, alignment: .center)
@@ -55,13 +55,13 @@ struct MainView: View {
                 // if login
                 else {
                     VStack(spacing: 20){
-                        printStack(phoneNumber: $phoneNumber, isLogin: $isLogin)
+                        PrintStack(phoneNumber: $phoneNumber, isLogin: $isLogin)
                         
                         ZStack {
                             List {
-                                ForEach(printJobs.GetJobs(), id: \.self) { url in
-                                    let documentName = (url as NSString).lastPathComponent.removingPercentEncoding!
-                                    documentElement(icon: "doc.plaintext", documentName: "\(documentName)", url: url)
+                                ForEach(printJobQueue.jobs(), id: \.self) { url in
+                                    let documentName = url.decodedLastPathComponent
+                                    DocumentRow(icon: "doc.plaintext", documentName: "\(documentName)", url: url)
                                         .listRowBackground(Color.clear)
                                         .listRowInsets(EdgeInsets())
                                 }
@@ -73,7 +73,7 @@ struct MainView: View {
                             .padding(.horizontal, 15)
                             .frame(width: UIScreen.main.bounds.width - 30, alignment: .center)
                             .refreshable {
-                                printJobs.objectWillChange.send()
+                                printJobQueue.reload()
                             }
                         }
                         .overlay(
@@ -97,8 +97,9 @@ struct MainView: View {
             }
         }
         .offset(y: isLogin ? 0 : -100)
-        .animation(.easeInOut)
+        .animation(.easeInOut, value: isLogin)
         .onAppear {
+            printJobQueue.reload()
             rewardedAdFlowCoordinator.preloadAds()
         }
         .confirmationDialog("보상형 광고",
@@ -137,7 +138,7 @@ struct MainView: View {
     }
     
     func removeRows(at offsets: IndexSet) {
-        PrintJobs.instance.RemoveJob(index: offsets.first!)
+        printJobQueue.removeJobs(at: offsets)
     }
 
     /// 로그인 상태로 이동하기 위해 입력 정보를 초기화합니다.
@@ -225,7 +226,8 @@ struct BackToLoginButton: View {
 }
 
 
-struct loginStack: View{
+/// 로그인 입력 영역을 표시하는 뷰입니다.
+struct LoginStack: View{
     @State private var showAlert: Bool = false
     @Binding var phoneNumber: String
     @Binding var isLogin: Bool
@@ -291,13 +293,14 @@ enum HapticFeedbackManager {
 }
 
 
-struct printStack: View{
+/// 프린트 요청 및 업로드 진입 영역을 표시하는 뷰입니다.
+struct PrintStack: View{
     @Binding var phoneNumber: String
     @Binding var isLogin: Bool
     
     @State private var showingProgressView = false
     
-    @ObservedObject var printJobs = PrintJobs.instance
+    @ObservedObject var printJobQueue = PrintJobQueue.shared
     
     var body: some View{
         VStack {
@@ -315,7 +318,7 @@ struct printStack: View{
             
                 
                 Button(action: {
-                    guard PrintJobs.instance.GetJobs().count != 0 else { return }
+                    guard printJobQueue.jobs().isEmpty == false else { return }
                     showingProgressView = true
                 }){
                     Text("Print")
@@ -334,12 +337,13 @@ struct printStack: View{
     }
 }
 
-struct documentElement: View {
+/// 프린트 대기 문서 정보를 표시하는 행입니다.
+struct DocumentRow: View {
     var icon: String
     var documentName: String
     var url: String
     
-    @ObservedObject var printJobs = PrintJobs.instance
+    @ObservedObject var printJobQueue = PrintJobQueue.shared
     
     var body: some View {
         HStack (spacing: 15){
@@ -358,11 +362,10 @@ struct documentElement: View {
             HStack(spacing: 8) {
                 // A3/A4 선택 버튼
                 Button(action: {
-                    let currentIsA3 = printJobs.GetJobIsA3(url: url)
-                    printJobs.SetJobIsA3(url: url, isA3: !currentIsA3)
-                    printJobs.objectWillChange.send()
+                    let currentIsA3 = printJobQueue.isA3(for: url)
+                    printJobQueue.setA3(!currentIsA3, for: url)
                 }) {
-                    Text(printJobs.GetJobIsA3(url: url) ? "A3" : "A4")
+                    Text(printJobQueue.isA3(for: url) ? "A3" : "A4")
                         .modifier(TextModifier(font: UIConfiguration.listFont))
                         .frame(width: 40)
                         .padding(.vertical, 4)
@@ -375,10 +378,9 @@ struct documentElement: View {
                 
                 // 빼기 버튼
                 Button(action: {
-                    let currentQuantity = printJobs.GetJobQuantity(url: url)
+                    let currentQuantity = printJobQueue.jobQuantity(for: url)
                     if currentQuantity > 1 {
-                        printJobs.SetJobQuantity(url: url, quantity: currentQuantity - 1)
-                        printJobs.objectWillChange.send()
+                        printJobQueue.setJobQuantity(currentQuantity - 1, for: url)
                     }
                 }) {
                     Image(systemName: "minus.circle.fill")
@@ -387,15 +389,14 @@ struct documentElement: View {
                 }
                 .buttonStyle(PlainButtonStyle())
                 
-                Text("\(printJobs.GetJobQuantity(url: url))")
+                Text("\(printJobQueue.jobQuantity(for: url))")
                     .modifier(TextModifier(font: UIConfiguration.listFont))
                     .frame(width: 30)
                 
                 // 추가 버튼
                 Button(action: {
-                    let currentQuantity = printJobs.GetJobQuantity(url: url)
-                    printJobs.SetJobQuantity(url: url, quantity: currentQuantity + 1)
-                    printJobs.objectWillChange.send()
+                    let currentQuantity = printJobQueue.jobQuantity(for: url)
+                    printJobQueue.setJobQuantity(currentQuantity + 1, for: url)
                 }) {
                     Image(systemName: "plus.circle.fill")
                         .foregroundColor(.gray)

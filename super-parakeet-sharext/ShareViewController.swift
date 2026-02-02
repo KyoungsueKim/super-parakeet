@@ -16,6 +16,7 @@ class FileURL: ObservableObject {
 
 class ShareViewController: UIViewController {
     var fileURL = FileURL()
+    private let appGroupIdentifier = "group.KyoungsueKim.printer"
     
     @IBSegueAction func showSwiftUIView(_ coder: NSCoder) -> UIViewController? {
         return UIHostingController(coder: coder, rootView: SwiftUIView().environmentObject(fileURL))
@@ -29,48 +30,58 @@ class ShareViewController: UIViewController {
         }
 
         // at the end of viewDidLoad
-        NotificationCenter.default.addObserver(forName: NSNotification.Name("close"), object: nil, queue: nil) { _ in
+        NotificationCenter.default.addObserver(forName: .shareExtensionDidRequestClose, object: nil, queue: nil) { _ in
             self.close()
         }
     }
     
     private func getFileURL(extensionItem: NSExtensionItem) {
-        var propertyList: String?
-        for attachment in extensionItem.attachments! {
-            if attachment.hasItemConformingToTypeIdentifier("public.file-url"){
-                propertyList = "public.file-url"
+        guard let attachments = extensionItem.attachments, attachments.isEmpty == false else {
+            return
+        }
+
+        let supportedTypeIdentifiers = ["public.file-url", "com.adobe.pdf"]
+        for attachment in attachments {
+            guard let identifier = supportedTypeIdentifiers.first(where: attachment.hasItemConformingToTypeIdentifier) else {
+                continue
             }
-            else if attachment.hasItemConformingToTypeIdentifier("com.adobe.pdf") {
-                propertyList = "com.adobe.pdf"
+
+            attachment.loadItem(forTypeIdentifier: identifier, options: nil) { [weak self] item, _ in
+                guard let self = self else { return }
+                guard let sourceURL = item as? URL else { return }
+                self.copyToSharedContainer(from: sourceURL)
             }
-            
-            if let identifier = propertyList {
-                attachment.loadItem(
-                    forTypeIdentifier: identifier,
-                    options: nil,
-                    completionHandler: { (item, error) -> Void in
-                        if let data = item as? URL {
-                            var sharedURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.KyoungsueKim.printer")
-                            
-                            do{
-                                let sharedFileUrl = ((sharedURL!.absoluteString) + (data.absoluteString as NSString).lastPathComponent)
-                                if FileManager.default.fileExists(atPath: (URL(string: sharedFileUrl)!.path)){
-                                    try FileManager.default.removeItem(at: URL(string: sharedFileUrl)!)
-                                }
-                                try FileManager.default.copyItem(at: data, to: URL(string: sharedFileUrl)!)
-                                print(sharedFileUrl)
-                                self.fileURL.fileURL = URL(string: sharedFileUrl)
-                                PrintJobs.instance.AddJobs(url: sharedFileUrl)
-                                PrintJobs.instance.objectWillChange.send()
-                                
-                            } catch {
-                                return
-                            }
-                        }
-                        
-                    }
-                )
+        }
+    }
+
+    /// 공유된 파일을 App Group 컨테이너로 복사합니다.
+    /// - Parameter sourceURL: 공유 확장에서 전달된 원본 파일 URL.
+    private func copyToSharedContainer(from sourceURL: URL) {
+        guard let sharedContainerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupIdentifier) else {
+            return
+        }
+
+        let didStartAccessing = sourceURL.startAccessingSecurityScopedResource()
+        defer {
+            if didStartAccessing {
+                sourceURL.stopAccessingSecurityScopedResource()
             }
+        }
+
+        let destinationURL = sharedContainerURL.appendingPathComponent(sourceURL.lastPathComponent)
+
+        do {
+            if FileManager.default.fileExists(atPath: destinationURL.path) {
+                try FileManager.default.removeItem(at: destinationURL)
+            }
+            try FileManager.default.copyItem(at: sourceURL, to: destinationURL)
+
+            DispatchQueue.main.async { [weak self] in
+                self?.fileURL.fileURL = destinationURL
+                PrintJobQueue.shared.addJob(url: destinationURL.absoluteString)
+            }
+        } catch {
+            return
         }
     }
     
@@ -80,3 +91,7 @@ class ShareViewController: UIViewController {
     }
 }
 
+extension Notification.Name {
+    /// 공유 확장 닫기 요청 알림입니다.
+    static let shareExtensionDidRequestClose = Notification.Name("shareExtensionDidRequestClose")
+}

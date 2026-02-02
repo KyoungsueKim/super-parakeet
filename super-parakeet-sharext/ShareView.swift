@@ -57,7 +57,7 @@ struct SwiftUIView: View {
     }
     
     func close() {
-        NotificationCenter.default.post(name: NSNotification.Name("close"), object: nil)
+        NotificationCenter.default.post(name: .shareExtensionDidRequestClose, object: nil)
     }
 }
 

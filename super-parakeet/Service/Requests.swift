@@ -34,6 +34,8 @@ enum UploadError: LocalizedError {
     case invalidFileURL(String)
     /// 파일이 존재하지 않는 경우.
     case fileNotFound(URL)
+    /// 업로드할 문서가 없는 경우.
+    case emptyQueue
     /// 서버가 2xx 이외의 상태 코드를 반환한 경우.
     case httpStatus(code: Int, message: String?)
     /// 네트워크/전송 오류.
@@ -48,6 +50,8 @@ enum UploadError: LocalizedError {
             return "파일 경로가 올바르지 않습니다: \(value)"
         case .fileNotFound(let url):
             return "파일을 찾을 수 없습니다: \(url.lastPathComponent)"
+        case .emptyQueue:
+            return "업로드할 문서가 없습니다."
         case .httpStatus(let code, let message):
             if let message = message, !message.isEmpty {
                 return "서버 오류가 발생했습니다. (HTTP \(code)) \(message)"
@@ -58,6 +62,55 @@ enum UploadError: LocalizedError {
         case .unknown:
             return "알 수 없는 오류가 발생했습니다."
         }
+    }
+}
+
+/// 업로드 계획 결과를 담는 모델입니다.
+struct UploadJobPlan {
+    /// 업로드 대상 작업 목록.
+    let jobs: [UploadJob]
+    /// 전체 업로드 개수.
+    let totalCount: Int
+    /// 문서별 완료 수량 초기값.
+    let completedJobs: [String: Int]
+}
+
+/// 프린트 큐 정보를 기반으로 업로드 계획을 생성합니다.
+final class UploadJobPlanner {
+    /// 프린트 큐 요약 정보를 받아 업로드 작업 목록을 생성합니다.
+    /// - Parameter descriptors: 프린트 큐 항목 요약 정보.
+    /// - Returns: 업로드 계획 또는 오류.
+    func makePlan(from descriptors: [PrintJobDescriptor]) -> Result<UploadJobPlan, UploadError> {
+        guard descriptors.isEmpty == false else {
+            return .failure(.emptyQueue)
+        }
+
+        var uploadJobs: [UploadJob] = []
+        var completedJobs: [String: Int] = [:]
+
+        for descriptor in descriptors {
+            guard let fileURL = URL(string: descriptor.urlString) else {
+                return .failure(.invalidFileURL(descriptor.urlString))
+            }
+
+            completedJobs[descriptor.urlString] = 0
+            let quantity = max(descriptor.quantity, 1)
+            for _ in 0..<quantity {
+                uploadJobs.append(UploadJob(id: descriptor.urlString, fileURL: fileURL, isA3: descriptor.isA3))
+            }
+        }
+
+        if uploadJobs.isEmpty {
+            return .failure(.emptyQueue)
+        }
+
+        return .success(
+            UploadJobPlan(
+                jobs: uploadJobs,
+                totalCount: uploadJobs.count,
+                completedJobs: completedJobs
+            )
+        )
     }
 }
 

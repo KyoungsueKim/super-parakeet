@@ -29,4 +29,7 @@ build/
 *.xccheckout
 *.moved-aside
 *.xcuserstate
-*.xcscmblueprint 
+*.xcscmblueprint
+
+# Misc
+AGENTS.md

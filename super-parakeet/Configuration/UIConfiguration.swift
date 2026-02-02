@@ -10,12 +10,17 @@ import SwiftUI
 import UIKit
 
 class UIConfiguration {
+    /// 폰트가 누락된 경우 시스템 폰트로 폴백합니다.
+    private static func font(named name: String, size: CGFloat, weight: UIFont.Weight) -> UIFont {
+        UIFont(name: name, size: size) ?? UIFont.systemFont(ofSize: size, weight: weight)
+    }
+
     // Fonts
-    static let titleFont = UIFont(name: "Arial Rounded MT Bold", size: 28)!
-    static let middleFont = UIFont(name: "Avenir-Medium", size: 18)!
-    static let subtitleFont = UIFont(name: "Avenir-Medium", size: 16)!
-    static let buttonFont = UIFont(name: "Avenir-Heavy", size: 18)!
-    static let listFont = UIFont(name: "Avenir-Medium", size: 19)!
+    static let titleFont = font(named: "Arial Rounded MT Bold", size: 28, weight: .bold)
+    static let middleFont = font(named: "Avenir-Medium", size: 18, weight: .medium)
+    static let subtitleFont = font(named: "Avenir-Medium", size: 16, weight: .medium)
+    static let buttonFont = font(named: "Avenir-Heavy", size: 18, weight: .heavy)
+    static let listFont = font(named: "Avenir-Medium", size: 19, weight: .medium)
     
     // Color
     static let backgroundColor: UIColor = .white
