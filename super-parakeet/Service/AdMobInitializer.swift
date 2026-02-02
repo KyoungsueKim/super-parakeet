@@ -36,12 +36,14 @@ private enum AdMobAdapterStatusLogger {
     static func log(status: InitializationStatus) {
         let adapterStatuses = status.adapterStatusesByClassName
         if adapterStatuses.isEmpty {
-            print("[AdMob] No adapter status available.")
+            AppLogger.ads.info("AdMob adapter status: empty")
             return
         }
 
         for (className, adapterStatus) in adapterStatuses {
-            print("[AdMob] Adapter: \(className) / Status: \(adapterStatus.state) / Description: \(adapterStatus.description)")
+            AppLogger.ads.info(
+                "AdMob adapter: \(className, privacy: .public) / Status: \(String(describing: adapterStatus.state), privacy: .public) / Description: \(adapterStatus.description, privacy: .public)"
+            )
         }
     }
 }

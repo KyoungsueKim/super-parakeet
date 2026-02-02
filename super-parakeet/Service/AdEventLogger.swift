@@ -25,10 +25,10 @@ enum AdEventLogger {
     ///   - detail: 상세 메시지.
     static func log(_ type: AdType, event: String, detail: String? = nil) {
         if let detail = detail {
-            print("[Ad][\(type.rawValue)] \(event) - \(detail)")
+            AppLogger.ads.info("\(type.rawValue, privacy: .public) \(event, privacy: .public) - \(detail, privacy: .public)")
             return
         }
-        print("[Ad][\(type.rawValue)] \(event)")
+        AppLogger.ads.info("\(type.rawValue, privacy: .public) \(event, privacy: .public)")
     }
 
     /// 광고 에러 정보를 상세하게 기록합니다.
@@ -39,6 +39,6 @@ enum AdEventLogger {
     static func logError(_ type: AdType, event: String, error: Error) {
         let nsError = error as NSError
         let detail = "\(nsError.domain) (\(nsError.code)) \(nsError.localizedDescription)"
-        log(type, event: event, detail: detail)
+        AppLogger.ads.error("\(type.rawValue, privacy: .public) \(event, privacy: .public) - \(detail, privacy: .public)")
     }
 }

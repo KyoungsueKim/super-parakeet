@@ -129,11 +129,21 @@ final class AlamofireUploadClient: UploadRequesting {
     private let endpointURL = URL(string: "https://print.kksoft.kr/upload_file/")!
 
     func upload(job: UploadJob, phoneNumber: String) async throws {
+        AppLogger.network.info(
+            "Upload start id=\(job.id, privacy: .private(mask: .hash)) file=\(job.fileURL.lastPathComponent, privacy: .private(mask: .hash)) a3=\(job.isA3)"
+        )
+
         guard job.fileURL.isFileURL else {
+            AppLogger.network.error(
+                "Upload failure invalid URL id=\(job.id, privacy: .private(mask: .hash))"
+            )
             throw UploadError.invalidFileURL(job.fileURL.absoluteString)
         }
 
         guard FileManager.default.fileExists(atPath: job.fileURL.path) else {
+            AppLogger.network.error(
+                "Upload failure file missing id=\(job.id, privacy: .private(mask: .hash))"
+            )
             throw UploadError.fileNotFound(job.fileURL)
         }
 
@@ -158,17 +168,33 @@ final class AlamofireUploadClient: UploadRequesting {
         if let error = response.error {
             if let statusCode = response.response?.statusCode {
                 let message = Self.normalizedServerMessage(from: response.data)
+                AppLogger.network.error(
+                    "Upload failure HTTP \(statusCode) id=\(job.id, privacy: .private(mask: .hash))"
+                )
                 throw UploadError.httpStatus(code: statusCode, message: message)
             }
 
             if let afError = error.asAFError {
                 if afError.isExplicitlyCancelledError {
+                    AppLogger.network.info(
+                        "Upload cancelled id=\(job.id, privacy: .private(mask: .hash))"
+                    )
                     throw CancellationError()
                 }
+                AppLogger.network.error(
+                    "Upload failure network id=\(job.id, privacy: .private(mask: .hash)) error=\(afError.localizedDescription, privacy: .public)"
+                )
                 throw UploadError.network(afError)
             }
+            AppLogger.network.error(
+                "Upload failure unknown id=\(job.id, privacy: .private(mask: .hash))"
+            )
             throw UploadError.unknown
         }
+
+        AppLogger.network.info(
+            "Upload success id=\(job.id, privacy: .private(mask: .hash))"
+        )
     }
 
     private static func normalizedServerMessage(from data: Data?) -> String? {
