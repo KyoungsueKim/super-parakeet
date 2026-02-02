@@ -6,9 +6,9 @@
 //
 
 import Foundation
-import UIKit
 import SwiftUI
-import MobileCoreServices
+import UIKit
+import UniformTypeIdentifiers
 
 class FileURL: ObservableObject {
     @Published var fileURL: URL?
@@ -40,7 +40,7 @@ class ShareViewController: UIViewController {
             return
         }
 
-        let supportedTypeIdentifiers = ["public.file-url", "com.adobe.pdf"]
+        let supportedTypeIdentifiers = [UTType.fileURL.identifier, UTType.pdf.identifier]
         for attachment in attachments {
             guard let identifier = supportedTypeIdentifiers.first(where: attachment.hasItemConformingToTypeIdentifier) else {
                 continue
