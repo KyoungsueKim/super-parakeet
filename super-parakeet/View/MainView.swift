@@ -10,8 +10,10 @@ import Messages
 import UIKit
 
 struct MainView: View {
+    @Environment(\.scenePhase) private var scenePhase
     @State var phoneNumber: String = ""
     @State var isLogin: Bool = false
+    @State private var hasLoadedLoginState: Bool = false
     @State private var showRewardedPrompt: Bool = false
     @State private var showRewardResultAlert: Bool = false
     @State private var rewardResultMessage: String = ""
@@ -24,6 +26,7 @@ struct MainView: View {
     
     @ObservedObject var printJobQueue = PrintJobQueue.shared
     @StateObject private var rewardedAdFlowCoordinator = RewardedAdFlowCoordinator()
+    private let keychainManager = KeychainManager.shared
 
     var body: some View {
         ZStack(alignment: .topLeading) {
@@ -101,6 +104,14 @@ struct MainView: View {
         .onAppear {
             printJobQueue.reload()
             rewardedAdFlowCoordinator.preloadAds()
+            loadLoginStateIfNeeded()
+        }
+        .onChange(of: scenePhase) { newPhase in
+            refreshQueueIfNeeded(for: newPhase)
+            persistLoginStateIfNeeded(for: newPhase)
+        }
+        .onChange(of: isLogin) { _ in
+            persistLoginState()
         }
         .confirmationDialog("보상형 광고",
                             isPresented: $showRewardedPrompt,
@@ -136,6 +147,44 @@ struct MainView: View {
                  : "앱 오프닝 광고를 활성화하시겠습니까?")
         }
     }
+
+    /// 앱이 포그라운드로 전환될 때 프린트 큐를 갱신합니다.
+    /// - Parameter phase: 현재 Scene 상태.
+    private func refreshQueueIfNeeded(for phase: ScenePhase) {
+        guard phase == .active, isLogin else { return }
+        printJobQueue.reload()
+    }
+
+    /// 앱 시작 시 저장된 로그인 정보를 복원합니다.
+    private func loadLoginStateIfNeeded() {
+        guard hasLoadedLoginState == false else { return }
+        hasLoadedLoginState = true
+
+        guard let storedPhoneNumber = keychainManager.loadPhoneNumber() else { return }
+        guard PhoneNumberValidator.isValid(storedPhoneNumber) else {
+            keychainManager.deletePhoneNumber()
+            return
+        }
+
+        phoneNumber = storedPhoneNumber
+        isLogin = true
+    }
+
+    /// Scene 상태 변화에 맞춰 로그인 정보를 저장합니다.
+    /// - Parameter phase: 현재 Scene 상태.
+    private func persistLoginStateIfNeeded(for phase: ScenePhase) {
+        guard phase == .background || phase == .inactive else { return }
+        persistLoginState()
+    }
+
+    /// 현재 로그인 정보를 Keychain에 저장하거나 삭제합니다.
+    private func persistLoginState() {
+        guard isLogin, PhoneNumberValidator.isValid(phoneNumber) else {
+            keychainManager.deletePhoneNumber()
+            return
+        }
+        keychainManager.savePhoneNumber(phoneNumber)
+    }
     
     func removeRows(at offsets: IndexSet) {
         printJobQueue.removeJobs(at: offsets)
@@ -146,6 +195,7 @@ struct MainView: View {
         KeyboardManager.dismiss()
         phoneNumber = ""
         isLogin = false
+        keychainManager.deletePhoneNumber()
     }
 
     /// 보상형 광고를 요청하고 표시합니다.
@@ -248,13 +298,10 @@ struct LoginStack: View{
                 Button(action: {
                     HapticFeedbackManager.lightImpact()
                     KeyboardManager.dismiss()
-                    let pattern = "010[0-9]{8}"
-                    guard phoneNumber.count == 11 && phoneNumber.range(of: pattern, options: .regularExpression) != nil else {
+                    guard PhoneNumberValidator.isValid(phoneNumber) else {
                         showAlert = true
                         return
                     }
-                    
-                    print("phoneNumber: \($phoneNumber)")
                     isLogin = true
                 }) {
                     Text("Log In")
