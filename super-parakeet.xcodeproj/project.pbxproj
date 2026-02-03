@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		F0A1B2C3D4E5F607F0A1B2C3 /* KeychainManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0A1B2C3D4E5F607F0A1B2C4 /* KeychainManager.swift */; };
+		F0A1B2C3D4E5F607F0A1B2C5 /* PhoneNumberValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0A1B2C3D4E5F607F0A1B2C6 /* PhoneNumberValidator.swift */; };
 		2999E47973DC45F5A7DBBF50 /* AdMobInitializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FBCE023C4E443D896F0F035 /* AdMobInitializer.swift */; };
 		638B976A187445F2A4A1EE2F /* UIApplication+TopViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D983483D8141495AB24BA6ED /* UIApplication+TopViewController.swift */; };
 		8CC806A2A3D44DB491A76369 /* AdMobConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D8BF41E376E4787B0DB32D5 /* AdMobConfiguration.swift */; };
@@ -77,6 +79,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		F0A1B2C3D4E5F607F0A1B2C4 /* KeychainManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainManager.swift; sourceTree = "<group>"; };
+		F0A1B2C3D4E5F607F0A1B2C6 /* PhoneNumberValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneNumberValidator.swift; sourceTree = "<group>"; };
 		33B65B2423B98D47CD5E4CB6 /* Pods-super-parakeet.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-super-parakeet.debug.xcconfig"; path = "Target Support Files/Pods-super-parakeet/Pods-super-parakeet.debug.xcconfig"; sourceTree = "<group>"; };
 		6329C3171FAE43A8868F61D4 /* RewardedAdManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RewardedAdManager.swift; sourceTree = "<group>"; };
 		6FBCE023C4E443D896F0F035 /* AdMobInitializer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdMobInitializer.swift; sourceTree = "<group>"; };
@@ -230,6 +234,7 @@
 		D1DC262A28A4F33E00D141AD /* Configuration */ = {
 			isa = PBXGroup;
 			children = (
+				F0A1B2C3D4E5F607F0A1B2C6 /* PhoneNumberValidator.swift */,
 				8D8BF41E376E4787B0DB32D5 /* AdMobConfiguration.swift */,
 				D1DC263028A4F56A00D141AD /* UIColorExt.swift */,
 				D983483D8141495AB24BA6ED /* UIApplication+TopViewController.swift */,
@@ -260,6 +265,7 @@
 		D1DC263928AA279000D141AD /* Service */ = {
 			isa = PBXGroup;
 			children = (
+				F0A1B2C3D4E5F607F0A1B2C4 /* KeychainManager.swift */,
 				F8C2A1B82F3A9C1000E1F1AA /* AppLogger.swift */,
 				6FBCE023C4E443D896F0F035 /* AdMobInitializer.swift */,
 				D1DC263A28AA27AD00D141AD /* Requests.swift */,
@@ -469,6 +475,8 @@
 			files = (
 				F8C2A1B92F3A9C1000E1F1AA /* AppLogger.swift in Sources */,
 				8CC806A2A3D44DB491A76369 /* AdMobConfiguration.swift in Sources */,
+				F0A1B2C3D4E5F607F0A1B2C5 /* PhoneNumberValidator.swift in Sources */,
+				F0A1B2C3D4E5F607F0A1B2C3 /* KeychainManager.swift in Sources */,
 				D1DC260228A4F10700D141AD /* MainView.swift in Sources */,
 				D122936428AECFDE00AFB2AE /* Extensions.swift in Sources */,
 				D1512A3728B46897000A8886 /* UploadStatusModalView.swift in Sources */,
