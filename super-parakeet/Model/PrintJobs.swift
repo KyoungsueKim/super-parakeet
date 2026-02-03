@@ -5,6 +5,7 @@
 //  Created by 김경수 on 2022/08/20.
 //
 
+import Combine
 import Foundation
 
 /// 프린트 큐 저장소 인터페이스입니다.
@@ -103,24 +104,39 @@ final class PrintJobQueue: ObservableObject {
 
     private let store: PrintJobQueueStoring
     private let settingsStore: PrintJobSettingsStoring
-    private var jobSettings: [String: PrintJobSettings] = [:]
+
+    /// 메모리에 유지되는 프린트 큐 목록입니다.
+    @Published private(set) var queue: [String] = []
+
+    /// 문서별 출력 설정(A3/수량) 캐시입니다.
+    @Published private(set) var jobSettings: [String: PrintJobSettings] = [:]
+
+    /// 저장소 반영 방식입니다.
+    private enum PersistAction {
+        /// 저장소에 값을 저장합니다.
+        case save
+        /// 저장소의 값을 제거합니다.
+        case clear
+        /// 저장소 갱신 없이 메모리만 갱신합니다.
+        case none
+    }
 
     /// 저장소를 주입받아 초기화합니다.
     /// - Parameter store: 프린트 큐 저장소.
     init(store: PrintJobQueueStoring & PrintJobSettingsStoring) {
         self.store = store
         self.settingsStore = store
-        loadState(notify: false)
+        loadState()
     }
 
     /// 현재 저장된 프린트 큐 목록을 반환합니다.
     func jobs() -> [String] {
-        store.loadQueue()
+        queue
     }
 
     /// 큐 변경에 맞춰 내부 상태를 정리하고 UI 갱신을 요청합니다.
     func reload() {
-        loadState(notify: true)
+        loadState()
     }
 
     /// 프린트 큐의 상세 정보를 반환합니다.
@@ -142,11 +158,11 @@ final class PrintJobQueue: ObservableObject {
 
     /// 지정한 문서의 출력 수량을 설정합니다.
     func setJobQuantity(_ quantity: Int, for url: String) {
-        var settings = jobSettings[url] ?? .default
+        var updatedSettings = jobSettings
+        var settings = updatedSettings[url] ?? .default
         settings.quantity = max(quantity, 1)
-        jobSettings[url] = settings
-        persistSettings()
-        objectWillChange.send()
+        updatedSettings[url] = settings
+        updateSettings(updatedSettings)
     }
 
     /// 지정한 문서의 A3 여부를 반환합니다.
@@ -156,79 +172,102 @@ final class PrintJobQueue: ObservableObject {
 
     /// 지정한 문서의 A3 여부를 설정합니다.
     func setA3(_ isA3: Bool, for url: String) {
-        var settings = jobSettings[url] ?? .default
+        var updatedSettings = jobSettings
+        var settings = updatedSettings[url] ?? .default
         settings.isA3 = isA3
-        jobSettings[url] = settings
-        persistSettings()
-        objectWillChange.send()
+        updatedSettings[url] = settings
+        updateSettings(updatedSettings)
     }
 
     /// 프린트 큐에 문서를 추가합니다.
     func addJob(url: String) {
-        var queue = jobs()
-        queue.append(url)
-        store.saveQueue(queue)
+        var updatedQueue = queue
+        updatedQueue.append(url)
+        updateQueue(updatedQueue)
+
         if jobSettings[url] == nil {
-            jobSettings[url] = .default
-            persistSettings()
+            var updatedSettings = jobSettings
+            updatedSettings[url] = .default
+            updateSettings(updatedSettings)
         }
-        objectWillChange.send()
     }
 
     /// 지정한 인덱스의 문서를 삭제합니다.
     func removeJob(at index: Int) {
-        var queue = jobs()
         guard queue.indices.contains(index) else { return }
-        let url = queue[index]
-        jobSettings.removeValue(forKey: url)
-        queue.remove(at: index)
-        store.saveQueue(queue)
-        persistSettings()
-        objectWillChange.send()
+        var updatedQueue = queue
+        let url = updatedQueue[index]
+        updatedQueue.remove(at: index)
+        updateQueue(updatedQueue)
+
+        var updatedSettings = jobSettings
+        updatedSettings.removeValue(forKey: url)
+        updateSettings(updatedSettings)
     }
 
     /// 다중 선택된 문서를 안전하게 삭제합니다.
     func removeJobs(at offsets: IndexSet) {
-        var queue = jobs()
+        var updatedQueue = queue
+        var updatedSettings = jobSettings
         for index in offsets.sorted(by: >) {
-            guard queue.indices.contains(index) else { continue }
-            let url = queue[index]
-            jobSettings.removeValue(forKey: url)
-            queue.remove(at: index)
+            guard updatedQueue.indices.contains(index) else { continue }
+            let url = updatedQueue[index]
+            updatedSettings.removeValue(forKey: url)
+            updatedQueue.remove(at: index)
         }
-        store.saveQueue(queue)
-        persistSettings()
-        objectWillChange.send()
+        updateQueue(updatedQueue)
+        updateSettings(updatedSettings)
     }
 
     /// 프린트 큐를 모두 비웁니다.
     func removeAllJobs() {
-        jobSettings.removeAll()
-        store.clearQueue()
-        settingsStore.clearSettings()
-        objectWillChange.send()
+        updateQueue([], persist: .clear)
+        updateSettings([:], persist: .clear)
     }
 
     /// 저장소 상태를 메모리에 로드하고 정규화합니다.
-    private func loadState(notify: Bool) {
-        let queue = store.loadQueue()
+    private func loadState() {
+        let loadedQueue = store.loadQueue()
         let storedSettings = settingsStore.loadSettings()
 
         var normalized: [String: PrintJobSettings] = [:]
-        for url in queue {
+        for url in loadedQueue {
             normalized[url] = (storedSettings[url] ?? .default).normalized
         }
 
-        jobSettings = normalized
-        settingsStore.saveSettings(normalized)
+        updateQueue(loadedQueue, persist: .none)
+        updateSettings(normalized, persist: .save)
+    }
 
-        if notify {
-            objectWillChange.send()
+    /// 큐를 갱신하고 저장소에 반영합니다.
+    /// - Parameters:
+    ///   - newQueue: 새 프린트 큐 목록.
+    ///   - persist: 저장소 반영 방식.
+    private func updateQueue(_ newQueue: [String], persist: PersistAction = .save) {
+        queue = newQueue
+        switch persist {
+        case .save:
+            store.saveQueue(newQueue)
+        case .clear:
+            store.clearQueue()
+        case .none:
+            break
         }
     }
 
-    /// 현재 설정을 저장소에 반영합니다.
-    private func persistSettings() {
-        settingsStore.saveSettings(jobSettings)
+    /// 문서 설정을 갱신하고 저장소에 반영합니다.
+    /// - Parameters:
+    ///   - newSettings: 새 설정 딕셔너리.
+    ///   - persist: 저장소 반영 방식.
+    private func updateSettings(_ newSettings: [String: PrintJobSettings], persist: PersistAction = .save) {
+        jobSettings = newSettings
+        switch persist {
+        case .save:
+            settingsStore.saveSettings(newSettings)
+        case .clear:
+            settingsStore.clearSettings()
+        case .none:
+            break
+        }
     }
 }
