@@ -7,8 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		F0A1B2C3D4E5F607F0A1B2C3 /* KeychainManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0A1B2C3D4E5F607F0A1B2C4 /* KeychainManager.swift */; };
-		F0A1B2C3D4E5F607F0A1B2C5 /* PhoneNumberValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0A1B2C3D4E5F607F0A1B2C6 /* PhoneNumberValidator.swift */; };
 		2999E47973DC45F5A7DBBF50 /* AdMobInitializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FBCE023C4E443D896F0F035 /* AdMobInitializer.swift */; };
 		638B976A187445F2A4A1EE2F /* UIApplication+TopViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D983483D8141495AB24BA6ED /* UIApplication+TopViewController.swift */; };
 		8CC806A2A3D44DB491A76369 /* AdMobConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D8BF41E376E4787B0DB32D5 /* AdMobConfiguration.swift */; };
@@ -42,6 +40,8 @@
 		D1DC263728A4F5A500D141AD /* CustomModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1DC263528A4F5A500D141AD /* CustomModifier.swift */; };
 		D1DC263828A4F5A500D141AD /* CustomTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1DC263628A4F5A500D141AD /* CustomTextField.swift */; };
 		D1DC263B28AA27AD00D141AD /* Requests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1DC263A28AA27AD00D141AD /* Requests.swift */; };
+		F0A1B2C3D4E5F607F0A1B2C3 /* KeychainManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0A1B2C3D4E5F607F0A1B2C4 /* KeychainManager.swift */; };
+		F0A1B2C3D4E5F607F0A1B2C5 /* PhoneNumberValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0A1B2C3D4E5F607F0A1B2C6 /* PhoneNumberValidator.swift */; };
 		F84D08392DAC874600F6F204 /* Pods_super_parakeet.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EECBBA9323E53E4B25EC09E1 /* Pods_super_parakeet.framework */; };
 		F8552A6D2F2E418200E99086 /* RewardedAdFlowCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8552A6C2F2E418200E99086 /* RewardedAdFlowCoordinator.swift */; };
 		F8552A6F2F2E419000E99086 /* RewardedInterstitialAdManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8552A6E2F2E419000E99086 /* RewardedInterstitialAdManager.swift */; };
@@ -79,8 +79,6 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		F0A1B2C3D4E5F607F0A1B2C4 /* KeychainManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainManager.swift; sourceTree = "<group>"; };
-		F0A1B2C3D4E5F607F0A1B2C6 /* PhoneNumberValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneNumberValidator.swift; sourceTree = "<group>"; };
 		33B65B2423B98D47CD5E4CB6 /* Pods-super-parakeet.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-super-parakeet.debug.xcconfig"; path = "Target Support Files/Pods-super-parakeet/Pods-super-parakeet.debug.xcconfig"; sourceTree = "<group>"; };
 		6329C3171FAE43A8868F61D4 /* RewardedAdManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RewardedAdManager.swift; sourceTree = "<group>"; };
 		6FBCE023C4E443D896F0F035 /* AdMobInitializer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdMobInitializer.swift; sourceTree = "<group>"; };
@@ -115,6 +113,8 @@
 		D1DC263A28AA27AD00D141AD /* Requests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Requests.swift; sourceTree = "<group>"; };
 		D983483D8141495AB24BA6ED /* UIApplication+TopViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIApplication+TopViewController.swift"; sourceTree = "<group>"; };
 		EECBBA9323E53E4B25EC09E1 /* Pods_super_parakeet.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_super_parakeet.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		F0A1B2C3D4E5F607F0A1B2C4 /* KeychainManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainManager.swift; sourceTree = "<group>"; };
+		F0A1B2C3D4E5F607F0A1B2C6 /* PhoneNumberValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneNumberValidator.swift; sourceTree = "<group>"; };
 		F8552A6C2F2E418200E99086 /* RewardedAdFlowCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RewardedAdFlowCoordinator.swift; sourceTree = "<group>"; };
 		F8552A6E2F2E419000E99086 /* RewardedInterstitialAdManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RewardedInterstitialAdManager.swift; sourceTree = "<group>"; };
 		F8552A702F2E4CED00E99086 /* InterstitialAdManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InterstitialAdManager.swift; sourceTree = "<group>"; };
@@ -402,9 +402,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-super-parakeet/Pods-super-parakeet-resources-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Copy Pods Resources";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-super-parakeet/Pods-super-parakeet-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -441,9 +445,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-super-parakeet/Pods-super-parakeet-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-super-parakeet/Pods-super-parakeet-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -777,7 +785,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.2.1;
+				MARKETING_VERSION = 1.2.2;
 				OTHER_CODE_SIGN_FLAGS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.kyoungsuekim.super-parakeet";
 				PRODUCT_NAME = "super-parakeet";
