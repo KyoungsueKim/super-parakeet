@@ -181,15 +181,24 @@ final class PrintJobQueue: ObservableObject {
 
     /// 프린트 큐에 문서를 추가합니다.
     func addJob(url: String) {
+        if queue.contains(url) {
+            var updatedSettings = jobSettings
+            let current = updatedSettings[url]?.normalized ?? .default
+            updatedSettings[url] = PrintJobSettings(
+                quantity: current.quantity + 1,
+                isA3: current.isA3
+            )
+            updateSettings(updatedSettings)
+            return
+        }
+
         var updatedQueue = queue
         updatedQueue.append(url)
         updateQueue(updatedQueue)
 
-        if jobSettings[url] == nil {
-            var updatedSettings = jobSettings
-            updatedSettings[url] = .default
-            updateSettings(updatedSettings)
-        }
+        var updatedSettings = jobSettings
+        updatedSettings[url] = (updatedSettings[url] ?? .default).normalized
+        updateSettings(updatedSettings)
     }
 
     /// 지정한 인덱스의 문서를 삭제합니다.
@@ -201,7 +210,9 @@ final class PrintJobQueue: ObservableObject {
         updateQueue(updatedQueue)
 
         var updatedSettings = jobSettings
-        updatedSettings.removeValue(forKey: url)
+        if updatedQueue.contains(url) == false {
+            updatedSettings.removeValue(forKey: url)
+        }
         updateSettings(updatedSettings)
     }
 
@@ -212,8 +223,10 @@ final class PrintJobQueue: ObservableObject {
         for index in offsets.sorted(by: >) {
             guard updatedQueue.indices.contains(index) else { continue }
             let url = updatedQueue[index]
-            updatedSettings.removeValue(forKey: url)
             updatedQueue.remove(at: index)
+            if updatedQueue.contains(url) == false {
+                updatedSettings.removeValue(forKey: url)
+            }
         }
         updateQueue(updatedQueue)
         updateSettings(updatedSettings)
@@ -230,12 +243,33 @@ final class PrintJobQueue: ObservableObject {
         let loadedQueue = store.loadQueue()
         let storedSettings = settingsStore.loadSettings()
 
-        var normalized: [String: PrintJobSettings] = [:]
+        var uniqueQueue: [String] = []
+        uniqueQueue.reserveCapacity(loadedQueue.count)
+
+        var occurrenceCounts: [String: Int] = [:]
+        occurrenceCounts.reserveCapacity(loadedQueue.count)
+
         for url in loadedQueue {
-            normalized[url] = (storedSettings[url] ?? .default).normalized
+            if occurrenceCounts[url] == nil {
+                uniqueQueue.append(url)
+                occurrenceCounts[url] = 1
+            } else {
+                occurrenceCounts[url, default: 0] += 1
+            }
         }
 
-        updateQueue(loadedQueue, persist: .none)
+        var normalized: [String: PrintJobSettings] = [:]
+        normalized.reserveCapacity(uniqueQueue.count)
+        for url in uniqueQueue {
+            let base = (storedSettings[url] ?? .default).normalized
+            let multiplier = occurrenceCounts[url] ?? 1
+            normalized[url] = PrintJobSettings(
+                quantity: base.quantity * max(multiplier, 1),
+                isA3: base.isA3
+            )
+        }
+
+        updateQueue(uniqueQueue, persist: .save)
         updateSettings(normalized, persist: .save)
     }
 
