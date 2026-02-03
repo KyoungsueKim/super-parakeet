@@ -10,6 +10,7 @@ import Messages
 import UIKit
 
 struct MainView: View {
+    @Environment(\.scenePhase) private var scenePhase
     @State var phoneNumber: String = ""
     @State var isLogin: Bool = false
     @State private var showRewardedPrompt: Bool = false
@@ -102,6 +103,9 @@ struct MainView: View {
             printJobQueue.reload()
             rewardedAdFlowCoordinator.preloadAds()
         }
+        .onChange(of: scenePhase) { newPhase in
+            refreshQueueIfNeeded(for: newPhase)
+        }
         .confirmationDialog("보상형 광고",
                             isPresented: $showRewardedPrompt,
                             titleVisibility: .visible) {
@@ -135,6 +139,13 @@ struct MainView: View {
                  ? "앱 오프닝 광고를 비활성화하시겠습니까?"
                  : "앱 오프닝 광고를 활성화하시겠습니까?")
         }
+    }
+
+    /// 앱이 포그라운드로 전환될 때 프린트 큐를 갱신합니다.
+    /// - Parameter phase: 현재 Scene 상태.
+    private func refreshQueueIfNeeded(for phase: ScenePhase) {
+        guard phase == .active, isLogin else { return }
+        printJobQueue.reload()
     }
     
     func removeRows(at offsets: IndexSet) {
