@@ -407,21 +407,23 @@ struct DocumentRow: View {
             Spacer()
             
             HStack(spacing: 8) {
-                // A3/A4 선택 버튼
-                Button(action: {
+                PrintOptionToggleButton(
+                    title: printJobQueue.duplexMode(for: url).displayTitle,
+                    width: 48,
+                    accessibilityLabel: "\(documentName) 단면 또는 양면 선택"
+                ) {
+                    let currentDuplexMode = printJobQueue.duplexMode(for: url)
+                    printJobQueue.setDuplexMode(currentDuplexMode.toggled, for: url)
+                }
+
+                PrintOptionToggleButton(
+                    title: printJobQueue.isA3(for: url) ? "A3" : "A4",
+                    width: 40,
+                    accessibilityLabel: "\(documentName) 용지 크기 선택"
+                ) {
                     let currentIsA3 = printJobQueue.isA3(for: url)
                     printJobQueue.setA3(!currentIsA3, for: url)
-                }) {
-                    Text(printJobQueue.isA3(for: url) ? "A3" : "A4")
-                        .modifier(TextModifier(font: UIConfiguration.listFont))
-                        .frame(width: 40)
-                        .padding(.vertical, 4)
-                        .background(
-                            RoundedRectangle(cornerRadius: 4)
-                                .stroke(Color.gray, lineWidth: 1)
-                        )
                 }
-                .buttonStyle(PlainButtonStyle())
                 
                 // 빼기 버튼
                 Button(action: {
@@ -454,6 +456,34 @@ struct DocumentRow: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .contentShape(Rectangle())
+    }
+}
+
+/// 프린트 문서 행에서 사용하는 작은 토글 옵션 버튼입니다.
+struct PrintOptionToggleButton: View {
+    /// 버튼에 표시할 짧은 제목입니다.
+    let title: String
+    /// 버튼의 고정 너비입니다.
+    let width: CGFloat
+    /// VoiceOver가 읽을 접근성 라벨입니다.
+    let accessibilityLabel: String
+    /// 버튼 선택 시 수행할 동작입니다.
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Text(title)
+                .modifier(TextModifier(font: UIConfiguration.listFont))
+                .frame(width: width)
+                .padding(.vertical, 4)
+                .background(
+                    RoundedRectangle(cornerRadius: 4)
+                        .stroke(Color.gray, lineWidth: 1)
+                )
+        }
+        .buttonStyle(PlainButtonStyle())
+        .accessibilityLabel(accessibilityLabel)
+        .accessibilityValue(title)
     }
 }
 

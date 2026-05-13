@@ -18,7 +18,7 @@ protocol PrintJobQueueStoring {
     func clearQueue()
 }
 
-/// 프린트 큐 개별 설정(수량/A3)을 저장하는 인터페이스입니다.
+/// 프린트 큐 개별 설정(수량/A3/양면)을 저장하는 인터페이스입니다.
 protocol PrintJobSettingsStoring {
     /// 저장된 문서별 설정을 불러옵니다.
     func loadSettings() -> [String: PrintJobSettings]
@@ -71,19 +71,90 @@ final class UserDefaultsPrintJobQueueStore: PrintJobQueueStoring, PrintJobSettin
     }
 }
 
+/// 프린트 서버가 지원하는 문서별 단면/양면 출력 모드입니다.
+enum PrintDuplexMode: String, Codable, Hashable {
+    /// 한 면에만 출력합니다.
+    case simplex = "simplex"
+    /// 용지의 긴 변을 기준으로 양면 출력합니다.
+    case longEdge = "long_edge"
+
+    /// 서버 API에 전달하는 폼 파라미터 값입니다.
+    var apiValue: String {
+        rawValue
+    }
+
+    /// 문서 행 옵션 버튼에 표시할 짧은 제목입니다.
+    var displayTitle: String {
+        switch self {
+        case .simplex:
+            return "단면"
+        case .longEdge:
+            return "양면"
+        }
+    }
+
+    /// 두 상태 UI에서 다음에 선택할 출력 모드입니다.
+    var toggled: PrintDuplexMode {
+        switch self {
+        case .simplex:
+            return .longEdge
+        case .longEdge:
+            return .simplex
+        }
+    }
+}
+
 /// 프린트 문서별 설정 정보입니다.
 struct PrintJobSettings: Codable, Hashable {
     /// 출력 수량.
     var quantity: Int
     /// A3 출력 여부.
     var isA3: Bool
+    /// 단면/양면 출력 모드.
+    var duplexMode: PrintDuplexMode
 
     /// 기본 설정입니다.
-    static let `default` = PrintJobSettings(quantity: 1, isA3: false)
+    static let `default` = PrintJobSettings(quantity: 1, isA3: false, duplexMode: .simplex)
+
+    /// 문서별 출력 설정을 생성합니다.
+    /// - Parameters:
+    ///   - quantity: 출력 수량.
+    ///   - isA3: A3 출력 여부.
+    ///   - duplexMode: 단면/양면 출력 모드.
+    init(quantity: Int, isA3: Bool, duplexMode: PrintDuplexMode = .simplex) {
+        self.quantity = quantity
+        self.isA3 = isA3
+        self.duplexMode = duplexMode
+    }
+
+    /// 저장 데이터의 키 목록입니다.
+    private enum CodingKeys: String, CodingKey {
+        case quantity
+        case isA3
+        case duplexMode
+    }
+
+    /// 저장된 문서별 출력 설정을 복원합니다.
+    /// - Parameter decoder: 저장 데이터 디코더.
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        quantity = try container.decodeIfPresent(Int.self, forKey: .quantity) ?? Self.default.quantity
+        isA3 = try container.decodeIfPresent(Bool.self, forKey: .isA3) ?? Self.default.isA3
+        duplexMode = try container.decodeIfPresent(PrintDuplexMode.self, forKey: .duplexMode) ?? Self.default.duplexMode
+    }
+
+    /// 문서별 출력 설정을 저장 가능한 데이터로 변환합니다.
+    /// - Parameter encoder: 저장 데이터 인코더.
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(quantity, forKey: .quantity)
+        try container.encode(isA3, forKey: .isA3)
+        try container.encode(duplexMode, forKey: .duplexMode)
+    }
 
     /// 수량이 1 미만인 경우 기본값으로 보정합니다.
     var normalized: PrintJobSettings {
-        PrintJobSettings(quantity: max(quantity, 1), isA3: isA3)
+        PrintJobSettings(quantity: max(quantity, 1), isA3: isA3, duplexMode: duplexMode)
     }
 }
 
@@ -95,9 +166,11 @@ struct PrintJobDescriptor: Hashable {
     let quantity: Int
     /// A3 출력 여부.
     let isA3: Bool
+    /// 단면/양면 출력 모드.
+    let duplexMode: PrintDuplexMode
 }
 
-/// 프린트 큐 상태와 사용자 설정(A3/수량)을 관리합니다.
+/// 프린트 큐 상태와 사용자 설정(A3/수량/양면)을 관리합니다.
 final class PrintJobQueue: ObservableObject {
     /// 앱 전역에서 사용하는 싱글턴 인스턴스입니다.
     static let shared = PrintJobQueue(store: UserDefaultsPrintJobQueueStore())
@@ -108,7 +181,7 @@ final class PrintJobQueue: ObservableObject {
     /// 메모리에 유지되는 프린트 큐 목록입니다.
     @Published private(set) var queue: [String] = []
 
-    /// 문서별 출력 설정(A3/수량) 캐시입니다.
+    /// 문서별 출력 설정(A3/수량/양면) 캐시입니다.
     @Published private(set) var jobSettings: [String: PrintJobSettings] = [:]
 
     /// 저장소 반영 방식입니다.
@@ -146,7 +219,8 @@ final class PrintJobQueue: ObservableObject {
             return PrintJobDescriptor(
                 urlString: urlString,
                 quantity: settings.quantity,
-                isA3: settings.isA3
+                isA3: settings.isA3,
+                duplexMode: settings.duplexMode
             )
         }
     }
@@ -179,6 +253,20 @@ final class PrintJobQueue: ObservableObject {
         updateSettings(updatedSettings)
     }
 
+    /// 지정한 문서의 단면/양면 출력 모드를 반환합니다.
+    func duplexMode(for url: String) -> PrintDuplexMode {
+        jobSettings[url]?.duplexMode ?? .simplex
+    }
+
+    /// 지정한 문서의 단면/양면 출력 모드를 설정합니다.
+    func setDuplexMode(_ duplexMode: PrintDuplexMode, for url: String) {
+        var updatedSettings = jobSettings
+        var settings = updatedSettings[url] ?? .default
+        settings.duplexMode = duplexMode
+        updatedSettings[url] = settings
+        updateSettings(updatedSettings)
+    }
+
     /// 프린트 큐에 문서를 추가합니다.
     func addJob(url: String) {
         if queue.contains(url) {
@@ -186,7 +274,8 @@ final class PrintJobQueue: ObservableObject {
             let current = updatedSettings[url]?.normalized ?? .default
             updatedSettings[url] = PrintJobSettings(
                 quantity: current.quantity + 1,
-                isA3: current.isA3
+                isA3: current.isA3,
+                duplexMode: current.duplexMode
             )
             updateSettings(updatedSettings)
             return
@@ -265,7 +354,8 @@ final class PrintJobQueue: ObservableObject {
             let multiplier = occurrenceCounts[url] ?? 1
             normalized[url] = PrintJobSettings(
                 quantity: base.quantity * max(multiplier, 1),
-                isA3: base.isA3
+                isA3: base.isA3,
+                duplexMode: base.duplexMode
             )
         }
 

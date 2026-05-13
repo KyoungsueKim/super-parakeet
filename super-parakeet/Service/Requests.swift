@@ -16,6 +16,8 @@ struct UploadJob: Hashable {
     let fileURL: URL
     /// A3 출력 여부.
     let isA3: Bool
+    /// 단면/양면 출력 모드.
+    let duplexMode: PrintDuplexMode
 }
 
 /// 업로드 진행 상태.
@@ -96,7 +98,14 @@ final class UploadJobPlanner {
             completedJobs[descriptor.urlString] = 0
             let quantity = max(descriptor.quantity, 1)
             for _ in 0..<quantity {
-                uploadJobs.append(UploadJob(id: descriptor.urlString, fileURL: fileURL, isA3: descriptor.isA3))
+                uploadJobs.append(
+                    UploadJob(
+                        id: descriptor.urlString,
+                        fileURL: fileURL,
+                        isA3: descriptor.isA3,
+                        duplexMode: descriptor.duplexMode
+                    )
+                )
             }
         }
 
@@ -130,7 +139,7 @@ final class AlamofireUploadClient: UploadRequesting {
 
     func upload(job: UploadJob, phoneNumber: String) async throws {
         AppLogger.network.info(
-            "Upload start id=\(job.id, privacy: .private(mask: .hash)) file=\(job.fileURL.lastPathComponent, privacy: .private(mask: .hash)) a3=\(job.isA3)"
+            "Upload start id=\(job.id, privacy: .private(mask: .hash)) file=\(job.fileURL.lastPathComponent, privacy: .private(mask: .hash)) a3=\(job.isA3) duplex=\(job.duplexMode.apiValue, privacy: .public)"
         )
 
         guard job.fileURL.isFileURL else {
@@ -149,7 +158,8 @@ final class AlamofireUploadClient: UploadRequesting {
 
         let parameters: [String: Any] = [
             "phone_number": phoneNumber,
-            "is_a3": job.isA3
+            "is_a3": job.isA3,
+            "duplex_mode": job.duplexMode.apiValue
         ]
 
         let uploadRequest = AF.upload(multipartFormData: { multipartFormData in
