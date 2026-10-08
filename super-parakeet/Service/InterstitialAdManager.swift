@@ -1,117 +1,85 @@
-//
-//  InterstitialAdManager.swift
-//  super-parakeet
-//
-//  Created by Codex on 2026/01/31.
-//
-
 import Foundation
+import Combine
 import GoogleMobileAds
 import UIKit
 
-/// 전면 광고 로드와 표시를 담당하는 매니저.
+/// Main-thread SDK adapter. AdSlot owns concurrency, expiry, timeout and completion rules.
+@MainActor
 final class InterstitialAdManager: NSObject, ObservableObject {
-    /// 현재 광고가 표시 가능한 상태인지 여부.
-    @Published private(set) var isAdReady: Bool = false
-
-    private var interstitialAd: InterstitialAd?
-    private var isLoading: Bool = false
-    private var onDismissHandler: (() -> Void)?
-    private var onFailureHandler: (() -> Void)?
-
-    /// 전면 광고를 미리 로드합니다.
-    func loadIfNeeded() {
-        guard interstitialAd == nil, isLoading == false else { return }
-        AdEventLogger.log(.interstitial, event: "loadIfNeeded")
-        load(completion: nil)
-    }
-
-    /// 전면 광고를 로드합니다.
-    /// - Parameter completion: 로드 성공 여부 콜백.
-    func load(completion: ((Bool) -> Void)?) {
-        AdEventLogger.log(.interstitial, event: "load:start")
-        isLoading = true
-        let request = Request()
-
-        InterstitialAd.load(with: AdMobConfiguration.interstitialAdUnitID,
-                            request: request) { [weak self] ad, error in
-            guard let self = self else { return }
-
+    @Published private(set) var isAdReady = false
+    private var presentingAd: InterstitialAd?
+    private var presentationEnd: ((Bool) -> Void)?
+    private lazy var slot = AdSlot<InterstitialAd> { completion in
+        InterstitialAd.load(with: AdMobConfiguration.interstitialAdUnitID, request: Request()) { ad, error in
             DispatchQueue.main.async {
-                self.isLoading = false
-
-                if let error = error {
-                    AdEventLogger.logError(.interstitial, event: "load:failure", error: error)
-                    self.interstitialAd = nil
-                    self.isAdReady = false
-                    completion?(false)
-                    return
-                }
-
-                self.interstitialAd = ad
-                self.interstitialAd?.fullScreenContentDelegate = self
-                self.isAdReady = true
-                AdEventLogger.log(.interstitial, event: "load:success")
-                completion?(true)
+                if let ad = ad { completion(.success(ad)) }
+                else { completion(.failure(error ?? AdLifecycleError.unavailable)) }
             }
         }
     }
-
-    /// 전면 광고를 표시합니다. 광고가 준비되지 않았으면 먼저 로드합니다.
-    /// - Parameters:
-    ///   - viewController: 표시 대상 루트 컨트롤러.
-    ///   - onFailure: 표시 실패 또는 로드 실패 시 호출되는 콜백.
-    ///   - onDismiss: 광고가 종료된 직후 호출되는 콜백.
-    func presentIfAvailable(from viewController: UIViewController,
+    func loadIfNeeded() { load(completion: nil) }
+    func load(completion: ((Bool) -> Void)?) {
+        precondition(Thread.isMainThread)
+        slot.load { [weak self] ready in self?.isAdReady = ready; completion?(ready) }
+    }
+    func presentIfAvailable(from viewController: UIViewController, owner: UUID? = nil,
                             onFailure: (() -> Void)? = nil,
-                            onDismiss: (() -> Void)? = nil) {
-        if let interstitialAd = interstitialAd {
-            AdEventLogger.log(.interstitial, event: "present:ready")
-            onDismissHandler = onDismiss
-            onFailureHandler = onFailure
-            interstitialAd.present(from: viewController)
-            return
-        }
-
-        AdEventLogger.log(.interstitial, event: "present:loadAndShow")
-        load { [weak self] success in
-            guard let self = self else { return }
-            guard success, let interstitialAd = self.interstitialAd else {
-                AdEventLogger.log(.interstitial, event: "present:loadFailure")
+                            onDismiss: (() -> Void)? = nil,
+                            onStall: @escaping (Error) -> Void = { _ in }) {
+        precondition(Thread.isMainThread)
+        guard !slot.isPresenting, !slot.hasPendingPresentation else { onFailure?(); return }
+        let requestedScene = viewController.viewIfLoaded?.window?.windowScene
+        var presenter: UIViewController?
+        var visibility: AdPresentationVisibility?
+        slot.present(owner: owner, canPresent: { ad in
+            // Resolve again after asynchronous loading; never retain a dismissed alert/ad as presenter.
+            guard UIApplication.shared.applicationState == .active,
+                  requestedScene?.activationState == .foregroundActive,
+                  let root = requestedScene?.windows.first(where: { $0.isKeyWindow && !$0.isHidden })?.rootViewController,
+                  root.presentedViewController == nil,
+                  let current = UIApplication.shared.topViewController(base: root),
+                  current.viewIfLoaded?.window != nil,
+                  !current.isBeingDismissed, !current.isBeingPresented,
+                  current.transitionCoordinator == nil else { throw AdLifecycleError.unavailable }
+            try ad.canPresent(from: current)
+            presenter = current; visibility = AdPresentationVisibility(presenter: current)
+        }, isVisible: {
+            visibility?.isSDKUIVisible() ?? false
+        }, show: { [weak self] ad, reward, end in
+            guard let self = self, let presenter = presenter else { end(false); return }
+            self.isAdReady = false; self.presentingAd = ad; self.presentationEnd = end
+            ad.fullScreenContentDelegate = self
+            AdEventLogger.log(.interstitial, event: "present:start")
+            ad.present(from: presenter)
+        }, onReward: {}, onStall: onStall, onEnd: { [weak self] dismissed in
+            // Duplicate/stale SDK callbacks cannot consume the next ad's handlers.
+            self?.presentationEnd = nil; self?.presentingAd = nil
+            self?.isAdReady = self?.slot.isReady ?? false
+            if dismissed { onDismiss?() } else {
+                if let error = self?.slot.lastError { AdEventLogger.logError(.interstitial, event: "present:unavailable", error: error) }
                 onFailure?()
-                return
             }
-
-            self.onDismissHandler = onDismiss
-            self.onFailureHandler = onFailure
-            interstitialAd.present(from: viewController)
-        }
+        })
     }
+    func cancelPending(owner: UUID?) { precondition(Thread.isMainThread); slot.cancelPending(owner: owner) }
 }
 
 extension InterstitialAdManager: FullScreenContentDelegate {
     func adDidDismissFullScreenContent(_ ad: FullScreenPresentingAd) {
-        DispatchQueue.main.async {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self, let current = self.presentingAd,
+                  (ad as AnyObject) === current else { return }
             AdEventLogger.log(.interstitial, event: "dismiss")
-            self.interstitialAd = nil
-            self.isAdReady = false
-            let dismissHandler = self.onDismissHandler
-            self.onDismissHandler = nil
-            self.onFailureHandler = nil
-            dismissHandler?()
+            self.presentationEnd?(true)
             self.loadIfNeeded()
         }
     }
-
     func ad(_ ad: FullScreenPresentingAd, didFailToPresentFullScreenContentWithError error: Error) {
-        DispatchQueue.main.async {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self, let current = self.presentingAd,
+                  (ad as AnyObject) === current else { return }
             AdEventLogger.logError(.interstitial, event: "present:failure", error: error)
-            self.interstitialAd = nil
-            self.isAdReady = false
-            let failureHandler = self.onFailureHandler
-            self.onDismissHandler = nil
-            self.onFailureHandler = nil
-            failureHandler?()
+            self.presentationEnd?(false)
             self.loadIfNeeded()
         }
     }

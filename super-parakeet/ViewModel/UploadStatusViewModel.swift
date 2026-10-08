@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Combine
 
 /// 업로드 진행 상태를 화면에 전달하는 뷰 모델입니다.
 @MainActor
@@ -26,6 +27,7 @@ final class UploadStatusViewModel: ObservableObject {
     private let useCase: UploadJobsUseCase
     private var uploadTask: Task<Void, Never>?
     private var hasStarted: Bool = false
+    private var acknowledgedCounts: [String: Int] = [:]
 
     /// 의존성을 주입해 초기화합니다.
     /// - Parameters:
@@ -57,9 +59,18 @@ final class UploadStatusViewModel: ObservableObject {
     /// 업로드 작업을 시작합니다.
     /// - Parameter phoneNumber: 사용자 전화번호.
     func start(phoneNumber: String) {
+        guard queue.beginUpload() else {
+            errorMessage = "다른 업로드가 완료되거나 취소될 때까지 기다려 주세요."
+            state = .FAILED
+            return
+        }
+        queue.reload()
+        if let error = queue.errorMessage { queue.endUpload(); errorMessage = error; state = .FAILED; return }
+        acknowledgedCounts = [:]
         let descriptors = queue.jobDescriptors()
         switch planner.makePlan(from: descriptors) {
         case .failure(let error):
+            queue.endUpload()
             errorMessage = error.localizedDescription
             state = .FAILED
             return
@@ -67,24 +78,32 @@ final class UploadStatusViewModel: ObservableObject {
             totalCount = plan.totalCount
             completedJobs = plan.completedJobs
 
-            uploadTask = Task { [weak self] in
-                guard let self else { return }
+            uploadTask = Task { [self] in
+                defer { self.queue.endUpload() }
                 do {
                     _ = try await useCase.start(
                         jobs: plan.jobs,
                         phoneNumber: phoneNumber
-                    ) { [weak self] progress in
-                        await MainActor.run {
-                            self?.onSuccessCount = progress.successCount
-                            self?.totalCount = progress.totalCount
-                            self?.completedJobs = progress.completedJobs
+                    ) { [self] progress in
+                        try await MainActor.run {
+                            for (key, count) in progress.completedJobs {
+                                let previous = self.acknowledgedCounts[key, default: 0]
+                                if count > previous, let id = UUID(uuidString: key) {
+                                    try self.queue.acknowledgeUpload(id: id, count: count - previous)
+                                    self.acknowledgedCounts[key] = count
+                                }
+                            }
+                            self.onSuccessCount = progress.successCount
+                            self.totalCount = progress.totalCount
+                            self.completedJobs = progress.completedJobs
                         }
                     }
 
                     self.state = .SUCCESS
-                    self.queue.removeAllJobs()
+
                 } catch is CancellationError {
-                    return
+                    self.errorMessage = "업로드를 취소했습니다. 완료된 수량은 목록에서 차감하고 남은 문서는 보존했습니다."
+                    self.state = .FAILED
                 } catch {
                     self.errorMessage = error.localizedDescription
                     self.state = .FAILED

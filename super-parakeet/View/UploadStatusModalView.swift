@@ -22,6 +22,7 @@ struct UploadStatusModalView: View {
     
     
     var body: some View {
+        Group {
         switch viewModel.state {
             case .PROGRESS:
                 UploadProgressView(phoneNumber: phoneNumber, viewModel: viewModel)
@@ -30,6 +31,8 @@ struct UploadStatusModalView: View {
             case .FAILED:
                 UploadFailedView(errorMessage: viewModel.errorMessage)
         }
+        }
+        .interactiveDismissDisabled(viewModel.state == .PROGRESS)
     }
 }
 
@@ -59,7 +62,6 @@ struct UploadProgressView: View {
             
             Button(action: {
                 viewModel.cancel()
-                presentation.wrappedValue.dismiss()
             }) {
                 Text("Cancel")
                     .modifier(ButtonModifier(font: UIConfiguration.buttonFont,

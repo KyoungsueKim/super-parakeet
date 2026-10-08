@@ -95,12 +95,12 @@ final class UploadJobPlanner {
                 return .failure(.invalidFileURL(descriptor.urlString))
             }
 
-            completedJobs[descriptor.urlString] = 0
+            completedJobs[descriptor.id.uuidString] = 0
             let quantity = max(descriptor.quantity, 1)
             for _ in 0..<quantity {
                 uploadJobs.append(
                     UploadJob(
-                        id: descriptor.urlString,
+                        id: descriptor.id.uuidString,
                         fileURL: fileURL,
                         isA3: descriptor.isA3,
                         duplexMode: descriptor.duplexMode
@@ -169,11 +169,11 @@ final class AlamofireUploadClient: UploadRequesting {
             multipartFormData.append(job.fileURL, withName: "file")
         }, to: endpointURL)
         .validate(statusCode: 200..<300)
-        let response = await withTaskCancellationHandler {
-            uploadRequest.cancel()
-        } operation: {
+        let response = await withTaskCancellationHandler(operation: {
             await uploadRequest.serializingData().response
-        }
+        }, onCancel: {
+            uploadRequest.cancel()
+        })
 
         if let error = response.error {
             if let statusCode = response.response?.statusCode {
@@ -248,7 +248,7 @@ final class UploadJobsUseCase {
     func start(
         jobs: [UploadJob],
         phoneNumber: String,
-        onProgress: @escaping @Sendable (UploadProgress) async -> Void
+        onProgress: @escaping @Sendable (UploadProgress) async throws -> Void
     ) async throws -> UploadProgress {
         guard jobs.isEmpty == false else {
             throw UploadError.emptyQueue
@@ -267,25 +267,33 @@ final class UploadJobsUseCase {
 
         var lastProgress: UploadProgress?
 
-        do {
-            try await withThrowingTaskGroup(of: String.self) { group in
-                for job in jobs {
-                    group.addTask {
+        // Drain every result, even after a failure/cancellation: confirmed successes
+        // must be acknowledged so a retry cannot submit them a second time.
+        var firstError: Error?
+        await withTaskGroup(of: Result<String, Error>.self) { group in
+            for job in jobs {
+                group.addTask {
+                    do {
                         try Task.checkCancellation()
                         try await self.uploader.upload(job: job, phoneNumber: phoneNumber)
-                        return job.id
-                    }
-                }
-
-                for try await jobId in group {
-                    let progress = await accumulator.recordSuccess(for: jobId)
-                    lastProgress = progress
-                    await onProgress(progress)
+                        return .success(job.id)
+                    } catch { return .failure(error) }
                 }
             }
-        } catch {
-            throw error
+            for await result in group {
+                switch result {
+                case .success(let id):
+                    let progress = await accumulator.recordSuccess(for: id)
+                    lastProgress = progress
+                    do { try await onProgress(progress) }
+                    catch { if firstError == nil { firstError = error }; group.cancelAll() }
+                case .failure(let error):
+                    if firstError == nil { firstError = error }
+                    group.cancelAll()
+                }
+            }
         }
+        if let error = firstError { throw error }
 
         return lastProgress ?? UploadProgress(
             successCount: 0,

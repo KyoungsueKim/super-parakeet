@@ -14,13 +14,22 @@ struct MainView: View {
     @State var phoneNumber: String = ""
     @State var isLogin: Bool = false
     @State private var hasLoadedLoginState: Bool = false
+    @State private var adPresenterReference = AdPresenterReference()
     @State private var showRewardedPrompt: Bool = false
     @State private var showRewardResultAlert: Bool = false
     @State private var rewardResultMessage: String = ""
-    @State private var earnedRewardMessages: [String] = []
-    @State private var didRewardedAdReward: Bool = false
-    @State private var didRewardedInterstitialReward: Bool = false
-    @State private var didInterstitialAdShown: Bool = false
+    private struct AdRewardResult {
+        var earned: Set<Int> = []
+        var announced: Set<Int> = []
+        var interstitialShown = false
+        var finished = false
+        var giftAnnounced = false
+    }
+    @State private var rewardResults: [UUID: AdRewardResult] = [:]
+    @State private var currentRewardRunID: UUID?
+    @State private var showNextAdConsent = false
+    @State private var nextAdStage = 1
+    @State private var nextAdConsent: ((Bool) -> Void)?
     @State private var showAppOpenPrompt: Bool = false
     @State private var isAppOpenAdEnabled: Bool = AppOpenAdPreference.isEnabled
     
@@ -36,6 +45,7 @@ struct MainView: View {
                     .frame(width: 120, height: 120, alignment: .center)
                     .padding(.top, 100)
                     .onTapGesture(count: 3) {
+                        guard !rewardedAdFlowCoordinator.isRunning else { return }
                         showRewardedPrompt = true
                     }
                     .onLongPressGesture(minimumDuration: 3) {
@@ -48,6 +58,13 @@ struct MainView: View {
                                            color: UIConfiguration.ajouColor))
                     .padding(.horizontal, 60)
                 
+                if rewardedAdFlowCoordinator.isRunning {
+                    ProgressView("광고 준비 중")
+                    Button("남은 광고 취소") { rewardedAdFlowCoordinator.cancel() }
+                }
+                if let message = rewardedAdFlowCoordinator.statusMessage {
+                    Text(message).foregroundColor(.secondary).padding(.horizontal)
+                }
                 // if not login
                 if (!isLogin) {
                     LoginStack(phoneNumber: $phoneNumber, isLogin: $isLogin)
@@ -60,10 +77,13 @@ struct MainView: View {
                     VStack(spacing: 20){
                         PrintStack(phoneNumber: $phoneNumber, isLogin: $isLogin)
                         
+                        if let error = printJobQueue.errorMessage {
+                            Text(error).foregroundColor(.red).padding(.horizontal, 15)
+                        }
                         ZStack {
                             List {
                                 ForEach(printJobQueue.jobs(), id: \.self) { url in
-                                    let documentName = url.decodedLastPathComponent
+                                    let documentName = printJobQueue.displayName(for: url)
                                     DocumentRow(icon: "doc.plaintext", documentName: "\(documentName)", url: url)
                                         .listRowBackground(Color.clear)
                                         .listRowInsets(EdgeInsets())
@@ -99,8 +119,20 @@ struct MainView: View {
                     .zIndex(1)
             }
         }
+        .background(AdPresenterReader(reference: adPresenterReference).frame(width: 0, height: 0).allowsHitTesting(false))
         .offset(y: isLogin ? 0 : -100)
         .animation(.easeInOut, value: isLogin)
+        .task(id: scenePhase) {
+            // A commit may arrive after the active transition. Read the authoritative
+            // manifest while visible; no snapshot is ever persisted by reload.
+            guard scenePhase == .active else { return }
+            while !Task.isCancelled {
+                printJobQueue.reload()
+                publishPendingRewards()
+                do { try await Task.sleep(nanoseconds: 1_000_000_000) }
+                catch { break }
+            }
+        }
         .onAppear {
             printJobQueue.reload()
             rewardedAdFlowCoordinator.preloadAds()
@@ -109,8 +141,14 @@ struct MainView: View {
         .onChange(of: scenePhase) { newPhase in
             refreshQueueIfNeeded(for: newPhase)
             persistLoginStateIfNeeded(for: newPhase)
+            if newPhase == .background { rewardedAdFlowCoordinator.cancel() }
+        }
+        .onDisappear { rewardedAdFlowCoordinator.cancel() }
+        .onChange(of: showNextAdConsent) { presented in
+            if !presented, nextAdConsent != nil { respondToNextAd(false) }
         }
         .onChange(of: isLogin) { _ in
+            printJobQueue.reload()
             persistLoginState()
         }
         .confirmationDialog("보상형 광고",
@@ -119,9 +157,17 @@ struct MainView: View {
             Button("광고 시청하고 보상받기") {
                 requestRewardedAd()
             }
+            .disabled(rewardedAdFlowCoordinator.isRunning)
             Button("취소", role: .cancel) { }
         } message: {
-            Text("원하는 경우에만 광고를 시청할 수 있습니다.")
+            Text("보상형, 보상형 전면, 전면 광고 순서로 최대 3개의 광고가 표시됩니다. 각 다음 광고를 보기 전에 종료할 수 있으며, 이미 얻은 보상은 보존됩니다.")
+        }
+        .confirmationDialog(nextAdStage == 1 ? "보상형 전면 광고를 볼까요?" : "전면 광고를 볼까요?",
+                            isPresented: $showNextAdConsent, titleVisibility: .visible) {
+            Button("다음 광고 보기") { respondToNextAd(true) }
+            Button("남은 광고 종료", role: .cancel) { respondToNextAd(false) }
+        } message: {
+            Text(nextAdStage == 1 ? "시청 완료 콜백이 확인되면 보상 안내가 표시됩니다. 원하지 않으면 남은 광고를 종료할 수 있습니다." : "이 광고는 추가 보상을 지급하지 않습니다. 이미 얻은 보상은 종료해도 유지됩니다.")
         }
         .alert("보상 안내", isPresented: $showRewardResultAlert) {
             Button("확인", role: .cancel) { }
@@ -151,7 +197,7 @@ struct MainView: View {
     /// 앱이 포그라운드로 전환될 때 프린트 큐를 갱신합니다.
     /// - Parameter phase: 현재 Scene 상태.
     private func refreshQueueIfNeeded(for phase: ScenePhase) {
-        guard phase == .active, isLogin else { return }
+        guard phase == .active else { return }
         printJobQueue.reload()
     }
 
@@ -198,44 +244,73 @@ struct MainView: View {
         keychainManager.deletePhoneNumber()
     }
 
-    /// 보상형 광고를 요청하고 표시합니다.
+    /// Each attempt owns its reward flags. Late mediation callbacks cannot reward a
+    /// later attempt or reset a reward already earned by a cancelled attempt.
     private func requestRewardedAd() {
-        guard let rootViewController = UIApplication.shared.topViewController() else {
+        guard !rewardedAdFlowCoordinator.isRunning else { return }
+        guard let rootViewController = adPresenterReference.viewController,
+              rootViewController.viewIfLoaded?.window != nil else {
             rewardResultMessage = "광고를 표시할 화면을 찾지 못했습니다."
             showRewardResultAlert = true
             return
         }
-
-        earnedRewardMessages.removeAll()
-        didRewardedAdReward = false
-        didRewardedInterstitialReward = false
-        didInterstitialAdShown = false
-
-        rewardedAdFlowCoordinator.presentRewardedFlow(from: rootViewController,
-                                                      onRewardedAdReward: {
-            didRewardedAdReward = true
-            earnedRewardMessages.append("보상형 광고 보상이 지급되었습니다.")
+        let run = UUID()
+        currentRewardRunID = run
+        rewardResults[run] = AdRewardResult()
+        rewardedAdFlowCoordinator.presentRewardedFlow(from: rootViewController, onRewardedAdReward: {
+            recordReward(run: run, stage: 0)
         }, onRewardedInterstitialReward: {
-            didRewardedInterstitialReward = true
-            earnedRewardMessages.append("보상형 전면 광고 보상이 지급되었습니다.")
+            recordReward(run: run, stage: 1)
         }, onInterstitialShown: {
-            didInterstitialAdShown = true
+            rewardResults[run]?.interstitialShown = true
         }, onAllAdsUnavailable: {
+            guard currentRewardRunID == run, FullScreenAdGate.shared.presentation == nil else { return }
             rewardResultMessage = "현재 광고를 불러올 수 없습니다. 잠시 후 다시 시도해주세요."
             showRewardResultAlert = true
+        }, onNextAdConsentRequested: { stage, response in
+            nextAdStage = stage
+            nextAdConsent = response
+            showNextAdConsent = true
         }, onFlowFinished: {
-            let shouldShowHiddenMessage = didRewardedAdReward
-            && didRewardedInterstitialReward
-            && didInterstitialAdShown
-
-            if shouldShowHiddenMessage {
-                earnedRewardMessages.append("광고를 끝까지 참고 기다려주셔서 정말 감사합니다!! 이 화면을 캡쳐해서 zp5njqlfex@ajou.ac.kr 으로 메일 보내주시면 맛있는 기프티콘을 선물로 드리겠습니다 :)")
-            }
-
-            guard earnedRewardMessages.isEmpty == false else { return }
-            rewardResultMessage = earnedRewardMessages.joined(separator: "\n")
-            showRewardResultAlert = true
+            nextAdConsent = nil; showNextAdConsent = false
+            rewardResults[run]?.finished = true
+            publishPendingRewards()
         })
+    }
+
+    private func respondToNextAd(_ accepted: Bool) {
+        let response = nextAdConsent
+        nextAdConsent = nil
+        showNextAdConsent = false
+        response?(accepted)
+    }
+
+    private func recordReward(run: UUID, stage: Int) {
+        guard var result = rewardResults[run], !result.earned.contains(stage) else { return }
+        result.earned.insert(stage)
+        rewardResults[run] = result
+        publishPendingRewards()
+    }
+
+    private func publishPendingRewards() {
+        guard !rewardedAdFlowCoordinator.isRunning, FullScreenAdGate.shared.presentation == nil else { return }
+        var messages: [String] = []
+        for run in Array(rewardResults.keys) {
+            guard var result = rewardResults[run], result.finished else { continue }
+            for stage in result.earned.subtracting(result.announced).sorted() {
+                messages.append(stage == 0 ? "보상형 광고 보상이 지급되었습니다." : "보상형 전면 광고 보상이 지급되었습니다.")
+                result.announced.insert(stage)
+            }
+            if result.earned.contains(0), result.earned.contains(1), !result.giftAnnounced {
+                messages.append("광고를 끝까지 참고 기다려주셔서 정말 감사합니다!! 이 화면을 캡쳐해서 zp5njqlfex@ajou.ac.kr 으로 메일 보내주시면 맛있는 기프티콘을 선물로 드리겠습니다 :)")
+                result.giftAnnounced = true
+            }
+            rewardResults[run] = result
+        }
+        guard !messages.isEmpty else { return }
+        if let message = rewardedAdFlowCoordinator.statusMessage { messages.append(message) }
+        rewardResultMessage = messages.joined(separator: "\n")
+        showRewardResultAlert = true
     }
 
     /// 앱 오프닝 광고 활성화 설정을 저장하고 광고 상태를 갱신합니다.
@@ -243,8 +318,47 @@ struct MainView: View {
     private func setAppOpenAdEnabled(_ isEnabled: Bool) {
         AppOpenAdPreference.isEnabled = isEnabled
         isAppOpenAdEnabled = isEnabled
-        let rootViewController = UIApplication.shared.topViewController()
+        let rootViewController = adPresenterReference.viewController
         AppOpenAdManager.shared.updatePreference(isEnabled: isEnabled, viewController: rootViewController)
+    }
+}
+
+// Keep user-initiated ads in the window containing this MainView. A global
+// key-window lookup can select a different foreground scene on iPad.
+private final class AdPresenterReference {
+    weak var viewController: UIViewController?
+}
+
+private struct AdPresenterReader: UIViewControllerRepresentable {
+    let reference: AdPresenterReference
+
+    func makeUIViewController(context: Context) -> ReaderController {
+        ReaderController(reference: reference)
+    }
+
+    func updateUIViewController(_ controller: ReaderController, context: Context) {
+        controller.captureIfAttached()
+    }
+
+    final class ReaderController: UIViewController {
+        private let reference: AdPresenterReference
+
+        init(reference: AdPresenterReference) {
+            self.reference = reference
+            super.init(nibName: nil, bundle: nil)
+        }
+        required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+        override func viewDidAppear(_ animated: Bool) {
+            super.viewDidAppear(animated)
+            captureIfAttached()
+        }
+        override func viewDidLayoutSubviews() {
+            super.viewDidLayoutSubviews()
+            captureIfAttached()
+        }
+        func captureIfAttached() {
+            if viewIfLoaded?.window != nil { reference.viewController = self }
+        }
     }
 }
 

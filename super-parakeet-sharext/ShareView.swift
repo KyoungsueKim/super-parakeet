@@ -1,63 +1,42 @@
-//
-//  ShareView.swift
-//  super-parakeet-sharext
-//
-//  Created by 김경수 on 2022/08/23.
-//
-
 import Foundation
 import SwiftUI
 import PDFKit
-import AVFoundation
 
 struct SwiftUIView: View {
-    @EnvironmentObject var fileURL: FileURL
-    
+    @EnvironmentObject var session: ShareImportSession
+    @State private var confirmCancel = false
+
     var body: some View {
-        VStack (spacing: 15){
-            let icon = fileURL.fileURL != nil ? "checkmark.circle" : "clear"
-            Image(systemName: icon)
-                .resizable()
-                .frame(width: 80, height: 80, alignment: .center)
-                .padding(.top, 100)
-                .onAppear(){
-                    HapticManager.instance.notification(type: .success)
-                    AudioServicesPlaySystemSound(1407)
-                }
-
-            let headMessage = fileURL.fileURL != nil ? "Successfully added to printing lists" : "Failed to add printing lists"
-            Text(headMessage)
-                .modifier(TextModifier(font: UIConfiguration.titleFont,
-                                   color: UIConfiguration.ajouColor))
-            
-            let bodyMessage = fileURL.fileURL != nil ? "어플리케이션을 실행하고 휴대폰 번호를 입력 후 Print 버튼을 눌러주세요." : "파일 로드에 문제가 발생했습니다. 다시 한번 시도해보세요."
-            Text(bodyMessage)
+        VStack(spacing: 15) {
+            if session.isWorking { ProgressView().padding(.top, 60) }
+            else {
+                Image(systemName: session.failedCount == 0 ? "checkmark.circle" : "exclamationmark.triangle")
+                    .resizable().frame(width: 70, height: 70).padding(.top, 60)
+            }
+            Text(session.message)
                 .modifier(TextModifier(font: UIConfiguration.middleFont))
-                .padding(.horizontal, 60)
-            
-            Button(action: {
-                self.close()
-            }) {
-                Text("Close")
-                    .modifier(ButtonModifier(font: UIConfiguration.buttonFont,
-                                             color: UIConfiguration.ajouColor,
-                                             textColor: .white,
-                                             width: 100,
-                                             height: 35,
-                                             cornerRadious: 10))
+                .padding(.horizontal, 30)
+            if session.canRetry {
+                Button("실패한 첨부 다시 시도") { session.retryFailed() }
             }
-            
-            if let url = fileURL.fileURL {
-                PDFKitRepresentedView(url: url)
+            Button("Close") {
+                NotificationCenter.default.post(name: .shareExtensionDidRequestClose, object: nil)
             }
-            
+            .disabled(!session.canClose)
+            if session.isWorking {
+                Button("가져오기 취소") { confirmCancel = true }
+            }
+            if let url = session.fileURL { PDFKitRepresentedView(url: url) }
             Spacer()
-
         }
-    }
-    
-    func close() {
-        NotificationCenter.default.post(name: .shareExtensionDidRequestClose, object: nil)
+        .alert("가져오기를 취소할까요?", isPresented: $confirmCancel) {
+            Button("계속 가져오기", role: .cancel) { }
+            Button("취소하고 닫기", role: .destructive) {
+                NotificationCenter.default.post(name: .shareExtensionDidRequestCancel, object: nil)
+            }
+        } message: {
+            Text("이미 목록에 추가된 문서는 보존됩니다. 남은 첨부는 추가되지 않습니다.")
+        }
     }
 }
 
@@ -78,6 +57,7 @@ struct PDFKitRepresentedView: UIViewRepresentable {
     }
 
     func updateUIView(_ uiView: UIView, context: UIViewRepresentableContext<PDFKitRepresentedView>) {
-        // Update the view.
+        guard let pdfView = uiView as? PDFView else { return }
+        if pdfView.document?.documentURL != url { pdfView.document = PDFDocument(url: url) }
     }
 }
