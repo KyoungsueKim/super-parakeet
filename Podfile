@@ -7,7 +7,7 @@ target 'super-parakeet' do
 
   # Pods for super-parakeet
   pod "Alamofire"
-  pod 'Google-Mobile-Ads-SDK'
+  pod 'Google-Mobile-Ads-SDK', '13.11.0'
 
 end
 

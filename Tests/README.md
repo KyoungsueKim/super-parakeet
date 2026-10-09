@@ -48,7 +48,7 @@ DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer sh Tests/run_ad_regress
 
 ## 남은 범위와 출시 전 판단
 
-1. 실제 Files/Safari/다른 공급자 앱의 공유 sheet, 실제 기기에서 extension 강제 종료/메모리 압박, mediation SDK의 실제 Close 및 다중 창 UI는 아직 확인하지 않았다. 기기에서 test ad ID와 합성 PDF만 사용하여 확인해야 한다. 실제 광고를 호출하거나 실제 인쇄/업로드하지 않았다.
+1. 실제 Files/Safari/다른 공급자 앱의 공유 sheet, 실제 기기에서 extension 강제 종료/메모리 압박, mediation SDK의 실제 Close 및 다중 창 UI는 아직 확인하지 않았다. 기기에서 합성 PDF만 사용하여 확인해야 한다. 실제 광고를 호출하거나 실제 인쇄/업로드하지 않았다.
 2. 사용자가 제공한 JPEG는 지원되는 Library 다운로드 경로에서 403으로 실패했다. 재발급 1회 후 중단했으며 픽셀을 보지 못했다. 따라서 그 이미지의 Close 위치/광고 종류는 판정하지 않았다.
 3. 기존 기프티콘 지급 약속 및 '보상 지급' 문구를 유지했다. 이 앱에는 영속적 보상 원장/서버 검증을 새로 구현하지 않았다. AdMob은 gift card 등 직접 금전 보상을 금지하고 간접 보상에도 앱 내 사용·양도 불가 조건을 둔다. 기존 약속의 정책 적합성과 실제 지급 설계는 출시 전 수정 또는 재설계가 필요하다. 이번 상태/Close 수정만으로 정책 적합성을 확정할 수 없다.
 4. 응답이 유실된 서버 수락의 exactly-once 업로드는 서버 idempotency 지원 없이는 보장하지 못한다. 확인된 성공만 로컬 큐에 반영한다. 강제 종료 시 미게시 staging 파일은 남을 수 있으며 안전한 age-based cleanup은 별도 개선이다. 파일 atomic replacement는 hard power loss까지 fsync 내구성을 보증하지 않는다.
@@ -61,3 +61,23 @@ DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer sh Tests/run_ad_regress
 - [Google rewards policy](https://support.google.com/admob/answer/7313578?hl=en-GB): 보상 유형·사전 설명·자발적 동의·약속 보상 지급.
 
 검증 로그·합성 화면·최초 원인 보고서는 Codex 작업 디렉터리 `/Users/kyoungsukim/Documents/Codex/2026-10-09/task-2`에 보관했다.
+
+## 후속 자동 연속 흐름 복원
+
+단계별 확인 창과 전체 흐름 취소 버튼을 제거했다. 정상 SDK dismiss와 표시 실패는 다음 단계로 자동 진행한다. SDK 전면 화면 가림은 MainView의 명시적 이탈로 취급하지 않는다. 실제 화면 이탈·배경 전환과 보이지 않는 UI의 누락 callback은 별도 종료/복구 경로를 사용한다. 보상 안내와 기프티콘 문구는 변경하지 않았다.
+
+`DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer python3 Tests/run_ad_flow_regression.py`는 production coordinator와 AdSlot을 컴파일하고 UI/SDK 경계만 mock한다. 자동 3연속·빠른/개별 닫기·중복 callback·no-fill/실패·로드/종료 timeout·화면 이탈/배경 취소 11개 시나리오를 검증한다. 기존 단계별 동의 코드에서 첫 정상 dismiss 후 다음 광고가 나타나지 않는 실패를 먼저 확인했다. 앞의 보고서는 최초 커밋 당시 기록이다.
+
+## iOS HIG 및 실제 화면 QA
+
+모든 iOS UI 작업은 프로젝트 AGENTS.md의 Apple HIG 기준을 따른다. 완료 전 합성 자료/mock을 사용한 실제 screenshot을 캡처하고 직접 확인하며, 수정 후 재캡처한다. 소형/대형, light/dark, 큰 접근성 글씨와 키보드를 점검하고 미검증 조건을 보고한다. 개인정보처리방침 열기는 Link/Button으로 제공하고 스위치는 on/off 설정에만 사용한다. 사용자 자료·운영 광고·실제 인쇄/업로드를 사용하지 않는다.
+
+이번 공유·문서·광고 안내 점검은 iOS 27의 격리 iPhone SE 3/16 Pro Max simulator에서 수행했다. production UI/큐 소스를 사용하는 별도 harness의 광고·네트워크·키체인·인쇄 경계는 mock했다. 실제 SDK 포함 앱+확장 Debug 빌드 및 자동 광고 흐름 회귀 11개를 확인했다. 화면·근거 보고서는 Codex 작업 디렉터리의 `hig-captures`와 `super-parakeet-hig-visual-qa.md`에 보관한다.
+
+## 180초 광고 감시 타이머 후 연속 흐름 유지
+
+`RewardedAdFlowCoordinator`의 stall callback이 진행 중인 시퀀스를 취소하고 종료 지연 문구를 표시하던 처리를 제거했다. 광고가 길어져도 flow reservation을 유지하고 실제 SDK dismiss 후 다음 광고로 이어진다. SDK UI가 사라졌는데 callback이 누락된 경우에는 기존 AdSlot 복구 경로로 진행한다. 화면이 남아 있는 동안 다른 광고를 겹쳐 표시하지 않으며 보상 지급 조건은 그대로다.
+
+수정 전 회귀 테스트에서 180초 후 흐름이 취소되는 실패를 재현했다. 수정 후 production coordinator 회귀 12개와 AdLifecycle 회귀 20개가 통과했다. 각 단계에서 190초 후 정상 dismiss하는 경우와 timeout 후 UI가 사라지는 복구를 포함한다. SDK/UI 경계는 mock이므로 실제 광고 렌더링이나 기기에서의 닫기 동작을 검증한 결과는 아니다. 이번 변경은 coordinator 상태 처리에 한정하며 새 screenshot은 캡처하지 않았다.
+
+실제 설치된 SDK를 포함한 Debug simulator 앱/확장 빌드도 `BUILD SUCCEEDED`로 확인했다. 로그: `/tmp/parakeet-timeout-fix-build.log`. 실기기 광고, 소형/대형 light/dark·접근성 글씨·키보드 screenshot은 이번 상태 처리 수정에서 재검증하지 않았다.

@@ -7,27 +7,48 @@ struct SwiftUIView: View {
     @State private var confirmCancel = false
 
     var body: some View {
-        VStack(spacing: 15) {
-            if session.isWorking { ProgressView().padding(.top, 60) }
-            else {
-                Image(systemName: session.failedCount == 0 ? "checkmark.circle" : "exclamationmark.triangle")
-                    .resizable().frame(width: 70, height: 70).padding(.top, 60)
+        ScrollView {
+            VStack(spacing: 20) {
+                if session.isWorking {
+                    ProgressView().accessibilityLabel("문서 가져오는 중")
+                } else {
+                    Image(systemName: session.failedCount == 0 ? "checkmark.circle" : "exclamationmark.triangle")
+                        .font(.system(size: 48))
+                        .accessibilityHidden(true)
+                }
+                Text(session.message)
+                    .font(.body)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+                if session.canRetry {
+                    Button { session.retryFailed() } label: {
+                        Text("실패한 첨부 다시 시도")
+                            .multilineTextAlignment(.center)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .frame(maxWidth: .infinity, minHeight: 44)
+                    }
+                    .buttonStyle(.borderedProminent)
+                }
+                Button {
+                    NotificationCenter.default.post(name: .shareExtensionDidRequestClose, object: nil)
+                } label: {
+                    Text("Close").frame(minHeight: 44).contentShape(Rectangle())
+                }
+                .disabled(!session.canClose)
+                if session.isWorking {
+                    Button { confirmCancel = true } label: {
+                        Text("가져오기 취소").frame(minHeight: 44).contentShape(Rectangle())
+                    }
+                }
+                if let url = session.fileURL {
+                    PDFKitRepresentedView(url: url)
+                        .frame(minHeight: 240)
+                        .accessibilityLabel("가져온 PDF 미리보기")
+                }
             }
-            Text(session.message)
-                .modifier(TextModifier(font: UIConfiguration.middleFont))
-                .padding(.horizontal, 30)
-            if session.canRetry {
-                Button("실패한 첨부 다시 시도") { session.retryFailed() }
-            }
-            Button("Close") {
-                NotificationCenter.default.post(name: .shareExtensionDidRequestClose, object: nil)
-            }
-            .disabled(!session.canClose)
-            if session.isWorking {
-                Button("가져오기 취소") { confirmCancel = true }
-            }
-            if let url = session.fileURL { PDFKitRepresentedView(url: url) }
-            Spacer()
+            .padding(.horizontal, 20)
+            .padding(.vertical, 24)
+            .frame(maxWidth: .infinity)
         }
         .alert("가져오기를 취소할까요?", isPresented: $confirmCancel) {
             Button("계속 가져오기", role: .cancel) { }

@@ -1,0 +1,6 @@
+interface:
+  display_name: "Launch iOS App"
+  short_description: "Select a device by UDID and launch an iOS app"
+  default_prompt: "Use $launch-ios-app to select the requested device by UDID, launch the requested app, and verify it is running."
+policy:
+  allow_implicit_invocation: true

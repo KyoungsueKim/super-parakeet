@@ -11,6 +11,7 @@ import UIKit
 
 struct MainView: View {
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.sizeCategory) private var sizeCategory
     @State var phoneNumber: String = ""
     @State var isLogin: Bool = false
     @State private var hasLoadedLoginState: Bool = false
@@ -27,9 +28,6 @@ struct MainView: View {
     }
     @State private var rewardResults: [UUID: AdRewardResult] = [:]
     @State private var currentRewardRunID: UUID?
-    @State private var showNextAdConsent = false
-    @State private var nextAdStage = 1
-    @State private var nextAdConsent: ((Bool) -> Void)?
     @State private var showAppOpenPrompt: Bool = false
     @State private var isAppOpenAdEnabled: Bool = AppOpenAdPreference.isEnabled
     
@@ -39,75 +37,83 @@ struct MainView: View {
 
     var body: some View {
         ZStack(alignment: .topLeading) {
-            VStack(spacing: 20) {
-                Image(systemName: "printer")
-                    .resizable()
-                    .frame(width: 120, height: 120, alignment: .center)
-                    .padding(.top, 100)
-                    .onTapGesture(count: 3) {
-                        guard !rewardedAdFlowCoordinator.isRunning else { return }
-                        showRewardedPrompt = true
-                    }
-                    .onLongPressGesture(minimumDuration: 3) {
-                        isAppOpenAdEnabled = AppOpenAdPreference.isEnabled
-                        showAppOpenPrompt = true
-                    }
+            ScrollView {
+                VStack(spacing: 20) {
+                    Image(systemName: "printer")
+                        .resizable()
+                        .frame(width: 120, height: 120, alignment: .center)
+                        .padding(.top, isLogin ? 56 : 24)
+                        .onTapGesture(count: 3) {
+                            guard !rewardedAdFlowCoordinator.isRunning else { return }
+                            showRewardedPrompt = true
+                        }
+                        .onLongPressGesture(minimumDuration: 3) {
+                            isAppOpenAdEnabled = AppOpenAdPreference.isEnabled
+                            showAppOpenPrompt = true
+                        }
+                        .accessibilityLabel("프린터")
+                        .accessibilityAction(named: Text("보상형 광고 안내")) {
+                            guard !rewardedAdFlowCoordinator.isRunning else { return }
+                            showRewardedPrompt = true
+                        }
                 
-                Text("Ajou University Printing System")
-                    .modifier(TextModifier(font: UIConfiguration.titleFont,
-                                           color: UIConfiguration.ajouColor))
-                    .padding(.horizontal, 60)
+                    Text("Ajou University Printing System")
+                        .font(sizeCategory.isAccessibilityCategory ? .headline : .title)
+                        .fontWeight(.bold)
+                        .foregroundColor(Color(UIConfiguration.ajouColor))
+                        .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .padding(.horizontal, 20)
                 
-                if rewardedAdFlowCoordinator.isRunning {
-                    ProgressView("광고 준비 중")
-                    Button("남은 광고 취소") { rewardedAdFlowCoordinator.cancel() }
-                }
-                if let message = rewardedAdFlowCoordinator.statusMessage {
-                    Text(message).foregroundColor(.secondary).padding(.horizontal)
-                }
-                // if not login
-                if (!isLogin) {
-                    LoginStack(phoneNumber: $phoneNumber, isLogin: $isLogin)
+                    if rewardedAdFlowCoordinator.isRunning {
+                        ProgressView("광고 준비 중")
+                    }
+                    if let message = rewardedAdFlowCoordinator.statusMessage {
+                        Text(message).foregroundColor(.secondary).padding(.horizontal)
+                    }
+                    // if not login
+                    if (!isLogin) {
+                        LoginStack(phoneNumber: $phoneNumber, isLogin: $isLogin)
                     
-                    BannerAdView()
-                        .frame(width: UIScreen.main.bounds.width > 400 ? 400 : UIScreen.main.bounds.width, height: 50, alignment: .center)
-                }
-                // if login
-                else {
-                    VStack(spacing: 20){
-                        PrintStack(phoneNumber: $phoneNumber, isLogin: $isLogin)
-                        
-                        if let error = printJobQueue.errorMessage {
-                            Text(error).foregroundColor(.red).padding(.horizontal, 15)
-                        }
-                        ZStack {
-                            List {
-                                ForEach(printJobQueue.jobs(), id: \.self) { url in
-                                    let documentName = printJobQueue.displayName(for: url)
-                                    DocumentRow(icon: "doc.plaintext", documentName: "\(documentName)", url: url)
-                                        .listRowBackground(Color.clear)
-                                        .listRowInsets(EdgeInsets())
-                                }
-                                .onDelete(perform: removeRows)
-                            }
-                            .listStyle(PlainListStyle())
-                            .lineSpacing(20)
-                            .cornerRadius(13)
-                            .padding(.horizontal, 15)
-                            .frame(width: UIScreen.main.bounds.width - 30, alignment: .center)
-                            .refreshable {
-                                printJobQueue.reload()
-                            }
-                        }
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 13)
-                                .stroke(Color.gray.opacity(0.3), lineWidth: 1)
-                        )
-                        .padding(.horizontal, 15)
-                        
                         BannerAdView()
-                            .frame(width: UIScreen.main.bounds.width > 400 ? 400 : UIScreen.main.bounds.width, height: 50, alignment: .center)
-                            .padding(.bottom, 15)
+                            .frame(maxWidth: 400).frame(height: 50)
+                    }
+                    // if login
+                    else {
+                        VStack(spacing: 20){
+                            PrintStack(phoneNumber: $phoneNumber, isLogin: $isLogin)
+                        
+                            if let error = printJobQueue.errorMessage {
+                                Text(error).foregroundColor(.red).padding(.horizontal, 15)
+                            }
+                            ZStack {
+                                List {
+                                    ForEach(printJobQueue.jobs(), id: \.self) { url in
+                                        let documentName = printJobQueue.displayName(for: url)
+                                        DocumentRow(icon: "doc.plaintext", documentName: "\(documentName)", url: url)
+                                            .listRowBackground(Color.clear)
+                                            .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
+                                    }
+                                    .onDelete(perform: removeRows)
+                                }
+                                .listStyle(PlainListStyle())
+                                .lineSpacing(20)
+                                .cornerRadius(13)
+                                .frame(minHeight: 320)
+                                .refreshable {
+                                    printJobQueue.reload()
+                                }
+                            }
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 13)
+                                    .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                            )
+                            .padding(.horizontal, 15)
+                        
+                            BannerAdView()
+                                .frame(maxWidth: 400).frame(height: 50)
+                                .padding(.bottom, 15)
+                        }
                     }
                 }
             }
@@ -120,7 +126,6 @@ struct MainView: View {
             }
         }
         .background(AdPresenterReader(reference: adPresenterReference).frame(width: 0, height: 0).allowsHitTesting(false))
-        .offset(y: isLogin ? 0 : -100)
         .animation(.easeInOut, value: isLogin)
         .task(id: scenePhase) {
             // A commit may arrive after the active transition. Read the authoritative
@@ -143,9 +148,9 @@ struct MainView: View {
             persistLoginStateIfNeeded(for: newPhase)
             if newPhase == .background { rewardedAdFlowCoordinator.cancel() }
         }
-        .onDisappear { rewardedAdFlowCoordinator.cancel() }
-        .onChange(of: showNextAdConsent) { presented in
-            if !presented, nextAdConsent != nil { respondToNextAd(false) }
+        .onDisappear {
+            // SDK full-screen coverage is not an exit from the containing screen.
+            if FullScreenAdGate.shared.presentation == nil { rewardedAdFlowCoordinator.cancel() }
         }
         .onChange(of: isLogin) { _ in
             printJobQueue.reload()
@@ -160,14 +165,7 @@ struct MainView: View {
             .disabled(rewardedAdFlowCoordinator.isRunning)
             Button("취소", role: .cancel) { }
         } message: {
-            Text("보상형, 보상형 전면, 전면 광고 순서로 최대 3개의 광고가 표시됩니다. 각 다음 광고를 보기 전에 종료할 수 있으며, 이미 얻은 보상은 보존됩니다.")
-        }
-        .confirmationDialog(nextAdStage == 1 ? "보상형 전면 광고를 볼까요?" : "전면 광고를 볼까요?",
-                            isPresented: $showNextAdConsent, titleVisibility: .visible) {
-            Button("다음 광고 보기") { respondToNextAd(true) }
-            Button("남은 광고 종료", role: .cancel) { respondToNextAd(false) }
-        } message: {
-            Text(nextAdStage == 1 ? "시청 완료 콜백이 확인되면 보상 안내가 표시됩니다. 원하지 않으면 남은 광고를 종료할 수 있습니다." : "이 광고는 추가 보상을 지급하지 않습니다. 이미 얻은 보상은 종료해도 유지됩니다.")
+            Text("보상형, 보상형 전면, 전면 광고 순서로 최대 3개의 광고가 표시됩니다. 광고를 닫으면 다음 광고가 자동으로 이어집니다.")
         }
         .alert("보상 안내", isPresented: $showRewardResultAlert) {
             Button("확인", role: .cancel) { }
@@ -267,22 +265,10 @@ struct MainView: View {
             guard currentRewardRunID == run, FullScreenAdGate.shared.presentation == nil else { return }
             rewardResultMessage = "현재 광고를 불러올 수 없습니다. 잠시 후 다시 시도해주세요."
             showRewardResultAlert = true
-        }, onNextAdConsentRequested: { stage, response in
-            nextAdStage = stage
-            nextAdConsent = response
-            showNextAdConsent = true
         }, onFlowFinished: {
-            nextAdConsent = nil; showNextAdConsent = false
             rewardResults[run]?.finished = true
             publishPendingRewards()
         })
-    }
-
-    private func respondToNextAd(_ accepted: Bool) {
-        let response = nextAdConsent
-        nextAdConsent = nil
-        showNextAdConsent = false
-        response?(accepted)
     }
 
     private func recordReward(run: UUID, stage: Int) {
@@ -375,23 +361,34 @@ struct BackToLoginButton: View {
             Image(systemName: "chevron.left")
                 .font(.system(size: 18, weight: .semibold))
                 .foregroundColor(Color(UIConfiguration.ajouColor))
-                .padding(8)
+                .frame(width: 44, height: 44)
                 .background(
                     Circle()
-                        .fill(Color.white.opacity(0.9))
+                        .fill(Color(uiColor: .secondarySystemBackground))
                 )
                 .overlay(
                     Circle()
                         .stroke(Color.gray.opacity(0.2), lineWidth: 1)
                 )
         }
+        .frame(minWidth: 44, minHeight: 44)
         .accessibilityLabel("로그인 화면으로 돌아가기")
     }
 }
 
 
+private struct ResponsiveActionStack<Content: View>: View {
+    let vertical: Bool
+    @ViewBuilder let content: () -> Content
+    var body: some View {
+        if vertical { VStack(spacing: 12, content: content) }
+        else { HStack(spacing: 12, content: content) }
+    }
+}
+
 /// 로그인 입력 영역을 표시하는 뷰입니다.
 struct LoginStack: View{
+    @Environment(\.sizeCategory) private var sizeCategory
     @State private var showAlert: Bool = false
     @Binding var phoneNumber: String
     @Binding var isLogin: Bool
@@ -402,12 +399,15 @@ struct LoginStack: View{
                 .modifier(TextModifier(font: UIConfiguration.middleFont, color: .label))
                 .padding(.horizontal, 60)
             
-            HStack {
+            ResponsiveActionStack(vertical: sizeCategory.isAccessibilityCategory) {
                 TextField("010", text: $phoneNumber)
                     .modifier(TextModifier(font: UIConfiguration.middleFont))
-                    .frame(width: 250, height: 35, alignment: .center)
+                    .padding(.horizontal, 12)
+                    .frame(maxWidth: .infinity, minHeight: 44)
                     .background(RoundedRectangle(cornerRadius: 10).stroke(Color.gray, lineWidth: 1))
-                    .keyboardType(.decimalPad)
+                    .keyboardType(.phonePad)
+                    .textContentType(.telephoneNumber)
+                    .accessibilityLabel("휴대폰 번호")
                 
                 Button(action: {
                     HapticFeedbackManager.lightImpact()
@@ -422,14 +422,13 @@ struct LoginStack: View{
                         .modifier(ButtonModifier(font: UIConfiguration.buttonFont,
                                                  color: UIConfiguration.ajouColor,
                                                  textColor: .white,
-                                                 width: 100,
-                                                 height: 35,
                                                  cornerRadious: 10))
                 }
                 .alert(isPresented: $showAlert){
                     Alert(title: Text("안내매시지"), message: Text("올바른 휴대전화 번호를 입력해주세요."), dismissButton: .default(Text("Close")))
                 }
             }
+            .padding(.horizontal, 16)
         }
     }
 }
@@ -456,6 +455,7 @@ enum HapticFeedbackManager {
 
 /// 프린트 요청 및 업로드 진입 영역을 표시하는 뷰입니다.
 struct PrintStack: View{
+    @Environment(\.sizeCategory) private var sizeCategory
     @Binding var phoneNumber: String
     @Binding var isLogin: Bool
     
@@ -470,11 +470,12 @@ struct PrintStack: View{
                 .modifier(TextModifier(font: UIConfiguration.middleFont))
                 .padding(.horizontal, 10)
             
-            HStack {
+            ResponsiveActionStack(vertical: sizeCategory.isAccessibilityCategory) {
                 Text("로그인 정보: \(phoneNumber)")
                 .modifier(TextModifier(font: UIConfiguration.middleFont,
                                        color: .label))
-                .frame(width: 250, height: 35, alignment: .center)
+                .padding(.horizontal, 12)
+                .frame(maxWidth: .infinity, minHeight: 44)
                 .background(RoundedRectangle(cornerRadius: 10).stroke(Color.gray, lineWidth: 1))
             
                 
@@ -486,20 +487,20 @@ struct PrintStack: View{
                         .modifier(ButtonModifier(font: UIConfiguration.buttonFont,
                                                  color: UIConfiguration.ajouColor,
                                                  textColor: .white,
-                                                 width: 100,
-                                                 height: 35,
                                                  cornerRadious: 10))
                 }
                 .sheet(isPresented: $showingProgressView) {
                     UploadStatusModalView(phoneNumber: phoneNumber)
                 }
             }
+            .padding(.horizontal, 16)
         }
     }
 }
 
 /// 프린트 대기 문서 정보를 표시하는 행입니다.
 struct DocumentRow: View {
+    @Environment(\.sizeCategory) private var sizeCategory
     var icon: String
     var documentName: String
     var url: String
@@ -507,19 +508,18 @@ struct DocumentRow: View {
     @ObservedObject var printJobQueue = PrintJobQueue.shared
     
     var body: some View {
-        HStack (spacing: 15){
-            Image(systemName: "\(icon)")
-                .font(.system(size: 20))
- 
-            VStack(alignment: .leading, spacing: 0){
-                Divider().opacity(0)
-                Text("\(documentName)")
-                    .lineLimit(1)
-                    .modifier(TextModifier(font: UIConfiguration.listFont))
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(alignment: .top, spacing: 12) {
+                Image(systemName: icon)
+                    .font(.body)
+                    .accessibilityHidden(true)
+                Text(documentName)
+                    .font(.body)
+                    .multilineTextAlignment(.leading)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity, alignment: .leading)
             }
-            
-            Spacer()
-            
+            ResponsiveActionStack(vertical: sizeCategory.isAccessibilityCategory) {
             HStack(spacing: 8) {
                 PrintOptionToggleButton(
                     title: printJobQueue.duplexMode(for: url).displayTitle,
@@ -539,6 +539,8 @@ struct DocumentRow: View {
                     printJobQueue.setA3(!currentIsA3, for: url)
                 }
                 
+            }
+            HStack(spacing: 8) {
                 // 빼기 버튼
                 Button(action: {
                     let currentQuantity = printJobQueue.jobQuantity(for: url)
@@ -549,12 +551,18 @@ struct DocumentRow: View {
                     Image(systemName: "minus.circle.fill")
                         .foregroundColor(.gray)
                         .font(.system(size: 20))
+                        .frame(width: 44, height: 44)
+                        .contentShape(Rectangle())
                 }
                 .buttonStyle(PlainButtonStyle())
+                .frame(minWidth: 44, minHeight: 44)
+                .accessibilityLabel("출력 수량 줄이기")
+                .disabled(printJobQueue.jobQuantity(for: url) <= 1)
                 
                 Text("\(printJobQueue.jobQuantity(for: url))")
                     .modifier(TextModifier(font: UIConfiguration.listFont))
-                    .frame(width: 30)
+                    .frame(minWidth: 30)
+                    .accessibilityLabel("출력 수량")
                 
                 // 추가 버튼
                 Button(action: {
@@ -564,10 +572,16 @@ struct DocumentRow: View {
                     Image(systemName: "plus.circle.fill")
                         .foregroundColor(.gray)
                         .font(.system(size: 20))
+                        .frame(width: 44, height: 44)
+                        .contentShape(Rectangle())
                 }
                 .buttonStyle(PlainButtonStyle())
+                .frame(minWidth: 44, minHeight: 44)
+                .accessibilityLabel("출력 수량 늘리기")
+            }
             }
         }
+        .padding(.vertical, 12)
         .frame(maxWidth: .infinity, alignment: .leading)
         .contentShape(Rectangle())
     }
@@ -588,8 +602,8 @@ struct PrintOptionToggleButton: View {
         Button(action: action) {
             Text(title)
                 .modifier(TextModifier(font: UIConfiguration.listFont))
-                .frame(width: width)
-                .padding(.vertical, 4)
+                .frame(minWidth: max(width, 44), minHeight: 44)
+                .padding(.horizontal, 4)
                 .background(
                     RoundedRectangle(cornerRadius: 4)
                         .stroke(Color.gray, lineWidth: 1)
